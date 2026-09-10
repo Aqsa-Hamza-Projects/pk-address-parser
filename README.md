@@ -16,8 +16,9 @@ into clean, queryable records.
 ## Badges
 
 [![npm version](https://img.shields.io/npm/v/pk-address-parser)](https://www.npmjs.com/package/pk-address-parser)
-[![license MIT](https://img.shields.io/npm/l/pk-address-parser)](./LICENSE)
-[![types included](https://img.shields.io/npm/types/pk-address-parser)](https://www.npmjs.com/package/pk-address-parser)
+[![license MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+[![types included](https://img.shields.io/badge/types-TypeScript-blue.svg)](https://www.npmjs.com/package/pk-address-parser)
+[![zero dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)](./package.json)
 
 ## Why
 
