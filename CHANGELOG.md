@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 `## [x.y.z] — YYYY-MM-DD` section on top (matching the `package.json` bump),
 grouped into _Added_ / _Changed_ / _Fixed_ / _Removed_.
 
+## [Unreleased]
+
+### Added
+
+- Automated OIDC npm publishing workflow via GitHub Actions (`.github/workflows/publish.yml`).
+
 ## [0.0.3] — 2026-09-10
 
 ### Changed
