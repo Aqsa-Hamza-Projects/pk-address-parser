@@ -336,6 +336,13 @@ All notable changes are recorded in [CHANGELOG.md](./CHANGELOG.md), following
 
 Issues and pull requests are welcome at the
 [GitHub repository](https://github.com/Aqsa-Hamza-Projects/pk-address-parser).
+After cloning, enable the Git pre-commit hook once:
+
+```bash
+npm install
+npm run hooks:install
+```
+
 The local gate that must pass:
 
 ```bash

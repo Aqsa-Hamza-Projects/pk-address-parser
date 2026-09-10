@@ -1,6 +1,6 @@
 {
   "name": "pk-address-parser",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Parse, normalize and standardize messy Pakistani street addresses into structured fields — house, street, block, sector, phase, area, city, province. Zero-dependency TypeScript address parser for Pakistan e-commerce, logistics, delivery, real-estate and CRM.",
   "keywords": [
     "pakistan",
@@ -74,7 +74,7 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "examples": "npm run build && tsx examples/01-parse-address.ts && tsx examples/02-normalize-address.ts && tsx examples/03-geo-helpers.ts && tsx examples/04-batch-cleanup.ts && node examples/05-commonjs.cjs && node examples/06-esm.mjs",
-    "prepare": "husky",
+    "hooks:install": "husky",
     "prepublishOnly": "npm run typecheck && npm run lint && npm run format:check && npm run build && npm test && npm run examples"
   },
   "lint-staged": {

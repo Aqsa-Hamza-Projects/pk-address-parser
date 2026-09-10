@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 `## [x.y.z] — YYYY-MM-DD` section on top (matching the `package.json` bump),
 grouped into _Added_ / _Changed_ / _Fixed_ / _Removed_.
 
+## [0.0.3] — 2026-09-10
+
+### Changed
+
+- Dropped the `prepare` lifecycle script from `package.json`. The Husky Git hook
+  is now installed with `npm run hooks:install` (contributors only). Consumers
+  installing the package no longer see any install/lifecycle script.
+
 ## [0.0.2] — 2026-09-10
 
 First release published to npm.
