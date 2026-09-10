@@ -325,6 +325,12 @@ npm run examples
 | `05-commonjs.cjs`         | the CommonJS build via `require('pk-address-parser')` |
 | `06-esm.mjs`              | the ESM build via `import` in plain JavaScript        |
 
+## Changelog
+
+All notable changes are recorded in [CHANGELOG.md](./CHANGELOG.md), following
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
+[Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
 ## Contributing
 
 Issues and pull requests are welcome at the
