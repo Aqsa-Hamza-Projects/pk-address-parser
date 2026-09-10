@@ -1,0 +1,122 @@
+{
+  "provinceAliases": {
+    "Punjab": ["Punjab"],
+    "Sindh": ["Sindh", "Sind"],
+    "Khyber Pakhtunkhwa": [
+      "Khyber Pakhtunkhwa",
+      "KP",
+      "KPK",
+      "NWFP",
+      "Sarhad",
+      "Pakhtunkhwa"
+    ],
+    "Balochistan": ["Balochistan", "Baluchistan"],
+    "Islamabad Capital Territory": [
+      "Islamabad Capital Territory",
+      "ICT",
+      "Islamabad",
+      "Federal Capital"
+    ],
+    "Azad Jammu & Kashmir": [
+      "Azad Jammu & Kashmir",
+      "AJK",
+      "Azad Kashmir",
+      "AJ&K"
+    ],
+    "Gilgit-Baltistan": [
+      "Gilgit-Baltistan",
+      "GB",
+      "Northern Areas",
+      "Gilgit Baltistan"
+    ]
+  },
+  "cityAliases": {
+    "Karachi": ["KHI"],
+    "Lahore": ["LHR"],
+    "Islamabad": ["ISB"],
+    "Rawalpindi": ["RWP", "Pindi"],
+    "Faisalabad": ["Lyallpur", "FSD"],
+    "Peshawar": ["Pesh"],
+    "Quetta": ["QTA"],
+    "Hyderabad": ["HYD"],
+    "Multan": ["MUX"],
+    "Gujranwala": ["GWN"],
+    "Sialkot": ["SKT"],
+    "Sheikhupura": ["Shekhupura"],
+    "Vehari": ["Vihari"],
+    "Sahiwal": ["Montgomery"],
+    "Sargodha": [],
+    "Dera Ghazi Khan": ["DG Khan", "D.G. Khan"],
+    "Rahim Yar Khan": ["RYK"],
+    "Mingora": ["Mingaora", "Saidu Sharif"],
+    "Nawabshah": ["Benazirabad", "Shaheed Benazirabad"],
+    "Mirpur Khas": ["Mirpurkhas"]
+  },
+  "areas": [
+    {
+      "name": "DHA",
+      "aliases": ["Defence", "Defence Housing Authority", "D.H.A"],
+      "cities": [
+        "Lahore",
+        "Karachi",
+        "Islamabad",
+        "Rawalpindi",
+        "Gujranwala",
+        "Multan",
+        "Peshawar",
+        "Bahawalpur",
+        "Quetta"
+      ]
+    },
+    {
+      "name": "Bahria Town",
+      "aliases": ["Bahria"],
+      "cities": ["Lahore", "Karachi", "Rawalpindi", "Islamabad"]
+    },
+    {"name": "Johar Town", "aliases": [], "cities": ["Lahore"]},
+    {
+      "name": "Gulberg",
+      "aliases": ["Gulberg III", "Gulberg 3", "Gulberg II"],
+      "cities": ["Lahore", "Islamabad"]
+    },
+    {"name": "Model Town", "aliases": [], "cities": ["Lahore"]},
+    {"name": "Wapda Town", "aliases": [], "cities": ["Lahore", "Gujranwala"]},
+    {
+      "name": "Iqbal Town",
+      "aliases": ["Allama Iqbal Town"],
+      "cities": ["Lahore"]
+    },
+    {
+      "name": "Cantt",
+      "aliases": ["Cantonment"],
+      "cities": [
+        "Lahore",
+        "Karachi",
+        "Rawalpindi",
+        "Peshawar",
+        "Multan",
+        "Quetta"
+      ]
+    },
+    {"name": "Clifton", "aliases": [], "cities": ["Karachi"]},
+    {
+      "name": "Gulshan-e-Iqbal",
+      "aliases": ["Gulshan", "Gulshan e Iqbal"],
+      "cities": ["Karachi"]
+    },
+    {"name": "North Nazimabad", "aliases": [], "cities": ["Karachi"]},
+    {"name": "PECHS", "aliases": ["P.E.C.H.S"], "cities": ["Karachi"]},
+    {
+      "name": "Saddar",
+      "aliases": [],
+      "cities": ["Karachi", "Rawalpindi", "Peshawar"]
+    },
+    {"name": "Blue Area", "aliases": [], "cities": ["Islamabad"]},
+    {"name": "Hayatabad", "aliases": [], "cities": ["Peshawar"]},
+    {
+      "name": "Satellite Town",
+      "aliases": [],
+      "cities": ["Rawalpindi", "Gujranwala", "Bahawalpur", "Sargodha"]
+    }
+  ]
+}

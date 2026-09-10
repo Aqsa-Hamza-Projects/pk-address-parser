@@ -1,0 +1,9 @@
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+.claude/
+scripts/build-data/.cache/
+CLAUDE.md
+AGENTS.md
+.DS_Store

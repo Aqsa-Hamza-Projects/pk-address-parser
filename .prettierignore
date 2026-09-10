@@ -1,0 +1,8 @@
+node_modules/
+dist/
+coverage/
+.claude/
+src/data/
+scripts/build-data/.cache/
+package-lock.json
+*.min.js

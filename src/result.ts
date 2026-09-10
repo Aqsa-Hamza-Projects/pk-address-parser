@@ -1,0 +1,21 @@
+import type {ParsedAddress} from './interfaces/index.js';
+import {COUNTRY} from './constants.js';
+
+export function emptyResult(raw: string): ParsedAddress {
+  return {
+    house: null,
+    street: null,
+    block: null,
+    sector: null,
+    phase: null,
+    unit: null,
+    landmark: null,
+    area: null,
+    city: null,
+    province: null,
+    country: COUNTRY,
+    raw,
+    unmatched: [],
+    confidence: 0,
+  };
+}

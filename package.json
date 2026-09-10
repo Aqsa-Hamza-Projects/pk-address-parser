@@ -1,0 +1,109 @@
+{
+  "name": "pk-address-parser",
+  "version": "0.0.1",
+  "description": "Parse, normalize and standardize messy Pakistani street addresses into structured fields — house, street, block, sector, phase, area, city, province. Zero-dependency TypeScript address parser for Pakistan e-commerce, logistics, delivery, real-estate and CRM.",
+  "keywords": [
+    "pakistan",
+    "pakistani",
+    "address",
+    "address-parser",
+    "address-parsing",
+    "address-normalization",
+    "address-standardization",
+    "parse-address",
+    "normalize-address",
+    "pk",
+    "pk-address",
+    "pakistan-cities",
+    "pakistan-provinces",
+    "pakistan-districts",
+    "gazetteer",
+    "geocoding",
+    "lahore",
+    "karachi",
+    "islamabad",
+    "rawalpindi",
+    "faisalabad",
+    "ecommerce",
+    "e-commerce",
+    "logistics",
+    "delivery",
+    "shipping",
+    "shipping-address",
+    "courier",
+    "crm",
+    "real-estate",
+    "typescript",
+    "dha",
+    "bahria-town",
+    "urdu"
+  ],
+  "author": "Aqsa LogicByte",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsup",
+    "build:data": "tsx scripts/build-data/index.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "examples": "npm run build && tsx examples/01-parse-address.ts && tsx examples/02-normalize-address.ts && tsx examples/03-geo-helpers.ts && tsx examples/04-batch-cleanup.ts && node examples/05-commonjs.cjs && node examples/06-esm.mjs",
+    "prepare": "husky",
+    "prepublishOnly": "npm run typecheck && npm run lint && npm run format:check && npm run build && npm test && npm run examples"
+  },
+  "lint-staged": {
+    "*.{ts,cts,mts,js,cjs,mjs}": [
+      "prettier --check",
+      "eslint --max-warnings=0"
+    ],
+    "*.{json,md,yml,yaml}": "prettier --check"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Aqsa-Hamza-Projects/pk-address-parser.git"
+  },
+  "homepage": "https://github.com/Aqsa-Hamza-Projects/pk-address-parser#readme",
+  "bugs": {
+    "url": "https://github.com/Aqsa-Hamza-Projects/pk-address-parser/issues"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "@types/node": "^22.0.0",
+    "@vitest/coverage-v8": "^2.1.0",
+    "eslint": "^9.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.5.0",
+    "prettier": "^3.3.0",
+    "tsup": "^8.3.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "typescript-eslint": "^8.0.0",
+    "vitest": "^2.1.0"
+  }
+}

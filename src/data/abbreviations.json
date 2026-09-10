@@ -1,0 +1,20 @@
+{
+  "st": "street", "str": "street", "strt": "street",
+  "ph": "phase",
+  "blk": "block",
+  "hno": "house", "kothi": "house",
+  "sec": "sector",
+  "rd": "road",
+  "fl": "floor",
+  "apt": "apartment", "aptt": "apartment",
+  "khi": "karachi",
+  "isb": "islamabad", "isl": "islamabad", "isld": "islamabad",
+  "rwp": "rawalpindi", "pindi": "rawalpindi",
+  "lhr": "lahore",
+  "fsd": "faisalabad", "lyallpur": "faisalabad",
+  "gwn": "gujranwala",
+  "pesh": "peshawar",
+  "qta": "quetta",
+  "hyd": "hyderabad",
+  "pak": "pakistan", "pk": "pakistan"
+}
