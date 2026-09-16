@@ -4,6 +4,7 @@ import type {
   ComponentResult,
   ComponentRule,
 } from '../interfaces/index.js';
+import {HOUSE_LABELS, STREET_LABELS, NUMBER_WORDS} from './labels.js';
 
 const ROMAN: Record<string, string> = {
   i: '1',
@@ -44,17 +45,30 @@ function floorLabel(raw: string): string {
     .replace(/(\d+(?:st|nd|rd|th))\s+floor/, '$1 Floor');
 }
 
+const NUM = NUMBER_WORDS.join('|');
+
 // Order matters: labeled sector before block; bare sector after block/unit;
 // house label before bare '#'.
 const RULES: ComponentRule[] = [
+  // The digit is the anchor, not decoration: `makan`, `gali`, `ghar` and
+  // `lane` are also words inside ~370 real locality names (`Makan Bagh`,
+  // `Sund Gali`, `Ghanta Ghar`). Requiring a number after the label is what
+  // separates "house 12" from a place called after one — verified against
+  // all 4,281 gazetteer names in `test/label-corpus.test.ts`.
   {
     field: 'house',
-    re: /\b(?:house|hno|kothi|plot|h)\b\s*(?:\.?\s*no\.?)?\s*[:#.-]?\s*([0-9]+[a-z]?(?:[/-][0-9a-z]+)*)/i,
+    re: new RegExp(
+      `\\b(?:${HOUSE_LABELS.join('|')})\\b\\s*(?:\\.?\\s*(?:${NUM})\\.?)?\\s*[:#.-]?\\s*([0-9]+[a-z]?(?:[/-][0-9a-z]+)*)`,
+      'i'
+    ),
   },
   {field: 'house', re: /(?:^|[(,\s])#\s*([0-9]+[a-z]?(?:[/-][0-9a-z]+)*)/i},
   {
     field: 'street',
-    re: /\b(?:street|st)\b\.?\s*(?:no\.?\s*)?[:#.-]?\s*([0-9]+[a-z]?(?:-[0-9a-z]+)?)/i,
+    re: new RegExp(
+      `\\b(?:${STREET_LABELS.join('|')})\\b\\.?\\s*(?:(?:${NUM})\\.?\\s*)?[:#.-]?\\s*([0-9]+[a-z]?(?:-[0-9a-z]+)?)`,
+      'i'
+    ),
   },
   {
     field: 'sector',
