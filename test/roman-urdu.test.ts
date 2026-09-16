@@ -39,3 +39,24 @@ describe('Roman-Urdu house and street labels', () => {
     ).toBe('House 12, Street 5, Johar Town, Lahore, Punjab, Pakistan');
   });
 });
+
+describe('bare locality labels', () => {
+  it('drops the orphan mohalla once the area resolved', () => {
+    const r = parseAddress({address: 'mohalla islampura sialkot'});
+    expect(r.area).toBe('Islampura');
+    expect(r.city).toBe('Sialkot');
+    expect(r.unmatched).toEqual([]);
+  });
+
+  it('keeps the label when the gazetteer found no area', () => {
+    const r = parseAddress({address: 'goth allah dino, thatta'});
+    expect(r.area).toBe('Goth Allah Dino');
+    expect(r.unmatched).toEqual([]);
+  });
+
+  it('keeps everything when content remains beside the label', () => {
+    const r = parseAddress({address: 'goth ahmed, gulshan-e-iqbal, karachi'});
+    expect(r.unmatched).toContain('goth');
+    expect(r.unmatched).toContain('ahmed');
+  });
+});
