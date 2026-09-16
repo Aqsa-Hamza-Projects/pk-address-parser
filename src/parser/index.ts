@@ -6,6 +6,7 @@ import type {
 } from '../interfaces/index.js';
 import {normalizeInput} from '../normalize/index.js';
 import {extractComponents} from './components.js';
+import {extractPhone} from './phone.js';
 import {extractLandmark} from './landmark.js';
 import {resolveGeo} from './geo-resolve.js';
 import {assemble} from './assemble.js';
@@ -22,7 +23,14 @@ export function parseAddress(params: ParseAddressParams): ParsedAddress {
     defaultProvince: params.defaultProvince,
   };
 
-  const {segments} = normalizeInput(address);
+  const {text} = normalizeInput(address);
+  // Phone first: a pasted number must not reach the landmark or component
+  // rules, where it would be absorbed into a locality.
+  const {phone, remainder: withoutPhone} = extractPhone(text);
+  const segments = withoutPhone
+    .split(',')
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
 
   let landmark: string | null = null;
   let landmarkPrep = '';
@@ -58,6 +66,7 @@ export function parseAddress(params: ParseAddressParams): ParsedAddress {
       raw,
       components: matches,
       landmark: rebuilt === '' ? landmark : rebuilt,
+      phone,
       geo: merged,
       strict: params.strict ?? false,
     });
@@ -67,6 +76,7 @@ export function parseAddress(params: ParseAddressParams): ParsedAddress {
     raw,
     components: matches,
     landmark,
+    phone,
     geo,
     strict: params.strict ?? false,
   });

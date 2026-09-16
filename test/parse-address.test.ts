@@ -1,5 +1,5 @@
 import {describe, it, expect} from 'vitest';
-import {parseAddress} from '../src/index.js';
+import {parseAddress, normalizeAddress} from '../src/index.js';
 import {fixtures} from './fixtures/addresses.js';
 
 describe('parseAddress — spec examples', () => {
@@ -119,5 +119,46 @@ describe('parseAddress — fixtures', () => {
     for (const [k, v] of Object.entries(want)) {
       expect(got[k as keyof typeof got]).toEqual(v);
     }
+  });
+});
+
+describe('parseAddress — phone extraction (PR-A1)', () => {
+  it('extracts a trailing mobile instead of guessing it as an area', () => {
+    const r = parseAddress({
+      address: 'House 5 St 3 G-11/2 Islamabad 0300-1234567',
+    });
+    expect(r).toMatchObject({
+      house: '5',
+      street: '3',
+      sector: 'G-11/2',
+      phone: '03001234567',
+      area: null,
+      city: 'Islamabad',
+      unmatched: [],
+    });
+  });
+
+  it('keeps the phone out of the normalized string', () => {
+    const s = normalizeAddress({
+      address: 'House 5 St 3 G-11/2 Islamabad 0300-1234567',
+    });
+    expect(s).not.toContain('0300');
+    expect(s).toContain('Sector G-11/2');
+  });
+
+  it('finds a phone that trails a landmark segment', () => {
+    const r = parseAddress({
+      address: 'near Emporium Mall, Johar Town, Lahore, 0321-9876543',
+    });
+    expect(r.phone).toBe('03219876543');
+    expect(r.landmark).toContain('Emporium');
+  });
+
+  it('is null when there is no phone', () => {
+    expect(parseAddress({address: 'Johar Town, Lahore'}).phone).toBeNull();
+  });
+
+  it('is null for empty input', () => {
+    expect(parseAddress({address: ''}).phone).toBeNull();
   });
 });

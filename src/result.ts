@@ -14,6 +14,7 @@ export function emptyResult(raw: string): ParsedAddress {
     city: null,
     province: null,
     country: COUNTRY,
+    phone: null,
     raw,
     unmatched: [],
     confidence: 0,

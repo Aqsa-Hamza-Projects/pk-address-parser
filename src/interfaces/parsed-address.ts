@@ -12,6 +12,7 @@ export interface ParsedAddress {
   city: string | null;
   province: string | null;
   country: Country;
+  phone: string | null;
   raw: string;
   unmatched: string[];
   confidence: number;

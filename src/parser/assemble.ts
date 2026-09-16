@@ -43,6 +43,7 @@ export function assemble(input: AssembleInput): ParsedAddress {
   r.city = input.geo.city;
   r.province = input.geo.province;
   r.country = COUNTRY;
+  r.phone = input.phone;
 
   let leftover = input.geo.leftover;
   let areaFromFallback = false;
