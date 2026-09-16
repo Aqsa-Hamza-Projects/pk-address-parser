@@ -189,3 +189,66 @@ describe('parseAddress — a leftover becomes area only when it looks like one (
     expect(r.unmatched).toContain('12345');
   });
 });
+
+describe('parseAddress — a contact label never becomes the locality (PR-A1)', () => {
+  const labelled = [
+    'House 5, G-11/2, Islamabad, Cell 0300 1234567',
+    'House 5, G-11/2, Islamabad, Mob 0300-1234567',
+    'House 5, G-11/2, Islamabad, Ph# 0300-1234567',
+    'House 5, G-11/2, Islamabad, UAN 042-111-123-456',
+  ];
+  for (const address of labelled) {
+    it(`does not put the label in area: "${address.slice(24)}"`, () => {
+      const r = parseAddress({address});
+      expect(r.area).toBeNull();
+      expect(r.phone).not.toBeNull();
+    });
+  }
+});
+
+describe('parseAddress — floor and unit descriptors go to unmatched (PR-A1)', () => {
+  const descriptors = [
+    'Ground Floor',
+    'Top Floor',
+    'Basement',
+    'Floor 2',
+    'Unit 4 B',
+  ];
+  for (const d of descriptors) {
+    it(`"${d}" is not an area`, () => {
+      const r = parseAddress({
+        address: `Flat 3, ${d}, Sector G-6/2, Islamabad`,
+      });
+      expect(r.area).toBeNull();
+    });
+  }
+});
+
+describe('parseAddress — a non-Latin locality is still kept (PR-A1)', () => {
+  it('does not reject an Urdu-script leftover for having no ASCII letters', () => {
+    const r = parseAddress({address: 'House 5, گلشن اقبال, Karachi'});
+    expect(r.area).not.toBeNull();
+  });
+});
+
+describe('parseAddress — confidence scoring is unchanged by PR-A1', () => {
+  it('a guessed area still takes the fallback penalty, not the area credit', () => {
+    const guessed = parseAddress({
+      address: 'House 4, Gulshan-e-Somewhere, Lahore',
+    });
+    const known = parseAddress({address: 'House 4, Johar Town, Lahore'});
+    expect(guessed.area).toBe('Gulshan-E-Somewhere');
+    expect(known.area).toBe('Johar Town');
+    // +0.15 credit withheld and -0.10 applied => 0.25 below a gazetteer hit.
+    expect(known.confidence - guessed.confidence).toBeCloseTo(0.25, 5);
+  });
+
+  it('finding a phone does not add confidence', () => {
+    const without = parseAddress({address: 'House 5 St 3 G-11/2 Islamabad'});
+    const with_ = parseAddress({
+      address: 'House 5 St 3 G-11/2 Islamabad 0300-1234567',
+    });
+    expect(with_.phone).toBe('03001234567');
+    expect(with_.confidence).toBe(without.confidence);
+  });
+});

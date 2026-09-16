@@ -65,3 +65,63 @@ describe('extractPhone — remainder', () => {
     );
   });
 });
+
+describe('extractPhone — contact labels are consumed with the number', () => {
+  const labelled = [
+    'Cell 0300 1234567',
+    'Mob 0300-1234567',
+    'Ph: 0300-1234567',
+    'Ph# 0300-1234567',
+    'Mobile No. 0300-1234567',
+    'Contact 0300-1234567',
+    'WhatsApp 0300-1234567',
+  ];
+  for (const input of labelled) {
+    it(`consumes the label in "${input}"`, () => {
+      const {phone, remainder} = extractPhone(`Lahore, ${input}`);
+      expect(phone).toBe('03001234567');
+      expect(remainder.trim()).toBe('Lahore,');
+    });
+  }
+
+  it('leaves an unrelated leading word alone', () => {
+    const {remainder} = extractPhone('Gulberg 0300-1234567');
+    expect(remainder).toContain('Gulberg');
+  });
+});
+
+describe('extractPhone — UAN numbers', () => {
+  const uans: Array<[string, string]> = [
+    ['042 111 123 456', '042111123456'],
+    ['021-111-222-333', '021111222333'],
+    ['+92 51 111 222 333', '051111222333'],
+  ];
+  for (const [input, expected] of uans) {
+    it(`normalizes UAN ${input}`, () => {
+      expect(extractPhone(`Shop 4, ${input}, Lahore`).phone).toBe(expected);
+    });
+  }
+});
+
+describe('extractPhone — does not swallow non-phone numbers', () => {
+  // A false positive is destructive: the digits are removed from the address.
+  const keep: Array<[string, string]> = [
+    ['House 92 12345678 Lahore', 'a house number after a bare 92'],
+    ['Chak No 92 123456789, Sargodha', 'a chak number after a bare 92'],
+    ['Khasra 0123456789, Faisalabad', 'a khasra number (area code 1)'],
+    ['Khewat No 0456789012, Lahore', 'a khewat number'],
+    ['Invoice 2024-0012345678, Lahore', 'an invoice number (area code 0)'],
+    ['Plot 5, 0.123456789, Lahore', 'a decimal'],
+  ];
+  for (const [input, why] of keep) {
+    it(`does not treat ${why} as a phone`, () => {
+      expect(extractPhone(input).phone).toBeNull();
+    });
+  }
+
+  it('still finds a real number in the same sentence', () => {
+    expect(extractPhone('Khasra 0123456789, call 0300-1234567').phone).toBe(
+      '03001234567'
+    );
+  });
+});

@@ -7,26 +7,42 @@ function titleCase(s: string): string {
   return s.replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-const ORDINAL = /^\d+(?:st|nd|rd|th)$/i;
+const ORDINAL_SRC = '\\d+(?:st|nd|rd|th)';
+const ORDINAL = new RegExp(`^${ORDINAL_SRC}$`, 'i');
+
+// "2nd Floor", "Ground Floor", "Top Fl", "Floor 2", "Basement" — a storey, not
+// a locality. The component rules already own one of these per address; a
+// second one must not fall through to `area`.
+const FLOOR = new RegExp(
+  `^(?:(?:${ORDINAL_SRC}|ground|grnd|first|second|third|fourth|fifth|top|upper|lower|mezzanine)?\\s*(?:floor|fl)|floor\\s*(?:no\\.?)?\\s*\\d+|basement)$`,
+  'i'
+);
+
+// "Unit 4", "Flat 12-B", "Shop No. 7" — a sub-unit, not a locality.
+const SUBUNIT =
+  /^(?:unit|flat|shop|room|apartment|apt|suite|portion)\b[\s.:#-]*(?:no\.?)?[\s.:#-]*\d+\s*[a-z]?$/i;
 
 /**
  * Is a leftover run plausibly a locality name?
  *
  * The fallback below promotes leftovers to `area` when the gazetteer found
  * nothing. Without this check a pasted phone number, a floor descriptor or a
- * stray number becomes the locality a delivery app routes on. Patterns are
- * anchored to the WHOLE leftover, so `Unit 7 Latifabad` still reads as an area.
+ * stray number becomes the locality a delivery app routes on.
  */
 function looksLikeArea(tokens: string[]): boolean {
   const joined = tokens.join(' ').trim();
   if (joined === '') return false;
-  // No letters at all — a number, not a place.
-  if (!/[a-z]/i.test(joined)) return false;
+  // No letters in any script — a number, not a place. `\p{L}` rather than
+  // `[a-z]`, so an Urdu-script locality is still kept.
+  if (!/\p{L}/u.test(joined)) return false;
   // Every token is a number or a bare ordinal.
   if (tokens.every((t) => /^\d+$/.test(t) || ORDINAL.test(t))) return false;
-  // A floor or unit descriptor a component rule already consumed once.
-  if (/^\d+(?:st|nd|rd|th)\s+floor$/i.test(joined)) return false;
-  if (/^unit\s*(?:no\.?)?\s*\d+$/i.test(joined)) return false;
+  // Still carries a long digit run — a phone or reference number we failed to
+  // recognize, with a word stuck to it. Separators are dropped first so
+  // "042-111-123-456" reads as one run.
+  if (/\d{6,}/.test(joined.replace(/[\s.()-]/g, ''))) return false;
+  if (FLOOR.test(joined)) return false;
+  if (SUBUNIT.test(joined)) return false;
   return true;
 }
 

@@ -4,7 +4,7 @@ import type {
   ParsedAddress,
   GeoResolution,
 } from '../interfaces/index.js';
-import {normalizeInput} from '../normalize/index.js';
+import {normalizeInput, segment} from '../normalize/index.js';
 import {extractComponents} from './components.js';
 import {extractPhone} from './phone.js';
 import {extractLandmark} from './landmark.js';
@@ -27,10 +27,7 @@ export function parseAddress(params: ParseAddressParams): ParsedAddress {
   // Phone first: a pasted number must not reach the landmark or component
   // rules, where it would be absorbed into a locality.
   const {phone, remainder: withoutPhone} = extractPhone(text);
-  const segments = withoutPhone
-    .split(',')
-    .map((s) => s.trim())
-    .filter((s) => s.length > 0);
+  const segments = segment(withoutPhone);
 
   let landmark: string | null = null;
   let landmarkPrep = '';
