@@ -162,3 +162,30 @@ describe('parseAddress — phone extraction (PR-A1)', () => {
     expect(parseAddress({address: ''}).phone).toBeNull();
   });
 });
+
+describe('parseAddress — a leftover becomes area only when it looks like one (PR-A1)', () => {
+  it('sends a second floor descriptor to unmatched, not area', () => {
+    const r = parseAddress({
+      address: 'Flat 3, 2nd Floor, near Aabpara, Sector G-6/2, Islamabad',
+    });
+    expect(r).toMatchObject({
+      unit: 'Flat 3',
+      sector: 'G-6/2',
+      area: null,
+      city: 'Islamabad',
+      unmatched: ['2nd', 'Floor'],
+    });
+  });
+
+  it('still guesses a genuine unknown locality', () => {
+    const r = parseAddress({address: 'House 4, Gulshan-e-Somewhere, Lahore'});
+    expect(r.area).toBe('Gulshan-E-Somewhere');
+    expect(r.city).toBe('Lahore');
+  });
+
+  it('sends a bare number to unmatched', () => {
+    const r = parseAddress({address: 'House 4, 12345, Lahore'});
+    expect(r.area).toBeNull();
+    expect(r.unmatched).toContain('12345');
+  });
+});

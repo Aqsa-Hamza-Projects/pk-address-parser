@@ -7,6 +7,29 @@ function titleCase(s: string): string {
   return s.replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+const ORDINAL = /^\d+(?:st|nd|rd|th)$/i;
+
+/**
+ * Is a leftover run plausibly a locality name?
+ *
+ * The fallback below promotes leftovers to `area` when the gazetteer found
+ * nothing. Without this check a pasted phone number, a floor descriptor or a
+ * stray number becomes the locality a delivery app routes on. Patterns are
+ * anchored to the WHOLE leftover, so `Unit 7 Latifabad` still reads as an area.
+ */
+function looksLikeArea(tokens: string[]): boolean {
+  const joined = tokens.join(' ').trim();
+  if (joined === '') return false;
+  // No letters at all — a number, not a place.
+  if (!/[a-z]/i.test(joined)) return false;
+  // Every token is a number or a bare ordinal.
+  if (tokens.every((t) => /^\d+$/.test(t) || ORDINAL.test(t))) return false;
+  // A floor or unit descriptor a component rule already consumed once.
+  if (/^\d+(?:st|nd|rd|th)\s+floor$/i.test(joined)) return false;
+  if (/^unit\s*(?:no\.?)?\s*\d+$/i.test(joined)) return false;
+  return true;
+}
+
 function setComponent(
   result: ParsedAddress,
   field: ComponentField,
@@ -51,7 +74,8 @@ export function assemble(input: AssembleInput): ParsedAddress {
     input.geo.area == null &&
     !input.strict &&
     leftover.length > 0 &&
-    (r.city !== null || r.province !== null)
+    (r.city !== null || r.province !== null) &&
+    looksLikeArea(leftover)
   ) {
     r.area = titleCase(leftover.join(' '));
     leftover = [];
