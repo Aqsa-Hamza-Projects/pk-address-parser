@@ -43,6 +43,7 @@ parseAddress({address: 'House 23, Street 4, Block B, Johar Town, Lahore'});
 //   sector: null, phase: null, unit: null, landmark: null,
 //   area: 'Johar Town', city: 'Lahore', province: 'Punjab',
 //   country: 'Pakistan',
+//   phone: null,
 //   raw: 'House 23, Street 4, Block B, Johar Town, Lahore',
 //   unmatched: [], confidence: 0.95
 // }
@@ -98,6 +99,7 @@ console.log(parseAddress({address: 'DHA Phase 6 Lahore'}));
 //   house: null, street: null, block: null, sector: null,
 //   phase: '6', unit: null, landmark: null,
 //   area: 'DHA', city: 'Lahore', province: 'Punjab', country: 'Pakistan',
+//   phone: null,
 //   raw: 'DHA Phase 6 Lahore', unmatched: [], confidence: 0.85
 // }
 ```
@@ -113,7 +115,8 @@ console.log(parseAddress({address: 'Near Emporium Mall, Johar Town, Lahore'}));
 //   house: null, street: null, block: null, sector: null, phase: null,
 //   unit: null, landmark: 'Near Emporium Mall',
 //   area: 'Johar Town', city: 'Lahore', province: 'Punjab',
-//   country: 'Pakistan', raw: 'Near Emporium Mall, Johar Town, Lahore',
+//   country: 'Pakistan', phone: null,
+//   raw: 'Near Emporium Mall, Johar Town, Lahore',
 //   unmatched: [], confidence: 0.8
 // }
 ```
@@ -145,7 +148,10 @@ Plus the exported types `ParsedAddress` and `ParseAddressParams`.
 Parses a raw address into a `ParsedAddress`. `defaultCity` / `defaultProvince`
 fill in `city` / `province` when the input (and the gazetteer) cannot. With
 `strict: true`, an unrecognized leftover segment is **not** guessed as `area` —
-it goes to `unmatched` instead.
+it goes to `unmatched` instead. Even with `strict: false` (the default), a
+leftover is only guessed as `area` when it reads like a place name: one with no
+letters, one that is all digits or bare ordinals, an `Nth Floor` or a `Unit N`
+goes to `unmatched` regardless.
 
 ```ts
 parseAddress({address: 'DHA Phase 6 Lahore'});
@@ -241,22 +247,23 @@ isCity({name: 'Gotham'}); // false
 
 ### `ParsedAddress`
 
-| Field        | Type             | Notes                                                              |
-| ------------ | ---------------- | ------------------------------------------------------------------ |
-| `house`      | `string \| null` | Value only — `'23'`, `'5-A'`, `'23'` from `#23` / `Plot 5`         |
-| `street`     | `string \| null` | Value only — `'4'` from `Street 4` / `St 4` / `St. 4`              |
-| `block`      | `string \| null` | Value only, upper-cased — `'B'`, `'12-C'`                          |
-| `sector`     | `string \| null` | Value only, upper-cased — `'F-8/3'`, `'G-9'` (Islamabad / Karachi) |
-| `phase`      | `string \| null` | Value only — `'6'`; Roman numerals folded to digits (`II` → `'2'`) |
-| `unit`       | `string \| null` | `'Flat 3'`, `'Apartment 12-C'`, `'2nd Floor'`, `'Shop 4'`          |
-| `landmark`   | `string \| null` | Keeps its preposition — `'Near Emporium Mall'`, `'Opposite ...'`   |
-| `area`       | `string \| null` | Resolved locality, canonical gazetteer name — `'Johar Town'`       |
-| `city`       | `string \| null` | Resolved / inferred city — `'Lahore'`                              |
-| `province`   | `string \| null` | Resolved / inferred province — `'Punjab'`                          |
-| `country`    | `'Pakistan'`     | Constant                                                           |
-| `raw`        | `string`         | The original input, untouched                                      |
-| `unmatched`  | `string[]`       | Tokens that could not be classified (original casing)              |
-| `confidence` | `number`         | `0`–`1` heuristic — **advisory only**, not a probability           |
+| Field        | Type             | Notes                                                                      |
+| ------------ | ---------------- | -------------------------------------------------------------------------- |
+| `house`      | `string \| null` | Value only — `'23'`, `'5-A'`, `'23'` from `#23` / `Plot 5`                 |
+| `street`     | `string \| null` | Value only — `'4'` from `Street 4` / `St 4` / `St. 4`                      |
+| `block`      | `string \| null` | Value only, upper-cased — `'B'`, `'12-C'`                                  |
+| `sector`     | `string \| null` | Value only, upper-cased — `'F-8/3'`, `'G-9'` (Islamabad / Karachi)         |
+| `phase`      | `string \| null` | Value only — `'6'`; Roman numerals folded to digits (`II` → `'2'`)         |
+| `unit`       | `string \| null` | `'Flat 3'`, `'Apartment 12-C'`, `'2nd Floor'`, `'Shop 4'`                  |
+| `landmark`   | `string \| null` | Keeps its preposition — `'Near Emporium Mall'`, `'Opposite ...'`           |
+| `area`       | `string \| null` | Resolved locality, canonical gazetteer name — `'Johar Town'`               |
+| `city`       | `string \| null` | Resolved / inferred city — `'Lahore'`                                      |
+| `province`   | `string \| null` | Resolved / inferred province — `'Punjab'`                                  |
+| `country`    | `'Pakistan'`     | Constant                                                                   |
+| `phone`      | `string \| null` | PK mobile / landline found in the input, national digits — `'03001234567'` |
+| `raw`        | `string`         | The original input, untouched                                              |
+| `unmatched`  | `string[]`       | Tokens that could not be classified (original casing)                      |
+| `confidence` | `number`         | `0`–`1` heuristic — **advisory only**, not a probability                   |
 
 **`confidence` is advisory.** It is a rough `[0, 1]` score:
 `+0.35` province, `+0.30` city, `+0.15` area, `+0.05` each for house / street /
@@ -277,9 +284,9 @@ carries **7 provinces, ~204 cities/districts and ~3,230 localities**.
   GeoNames.
 - **Locality / street-level coverage is best-effort.** There is no authoritative
   complete source; the parser **degrades gracefully** — an unknown locality token
-  is kept (in `area` when it is the only leftover and `strict` is off, otherwise
-  in `unmatched`), and `city` / `province` still resolve and `normalizeAddress`
-  still works.
+  is kept (in `area` when it is the only leftover, `strict` is off, AND it reads
+  like a place name — otherwise in `unmatched`), and `city` / `province` still
+  resolve and `normalizeAddress` still works.
 
 To extend coverage, edit `scripts/build-data/overrides.json` and re-run the
 pipeline:

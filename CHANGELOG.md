@@ -14,6 +14,15 @@ grouped into _Added_ / _Changed_ / _Fixed_ / _Removed_.
 ### Added
 
 - Automated OIDC npm publishing workflow via GitHub Actions (`.github/workflows/publish.yml`).
+- `phone` on `ParsedAddress`: Pakistani mobile and landline numbers are extracted
+  before parsing and normalized to national digits (`03001234567`). Accepts
+  `+92`, `0092` and `92` prefixes with spaces, dots, dashes and parentheses.
+
+### Fixed
+
+- A leftover token run is no longer guessed as `area` unless it reads like a
+  place name. A pasted phone number, a bare number, an `Nth Floor` or a `Unit N`
+  now goes to `unmatched` instead of becoming the locality.
 
 ## [0.0.3] — 2026-09-10
 
