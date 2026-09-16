@@ -2,6 +2,7 @@ import {emptyResult} from '../result.js';
 import {COUNTRY} from '../constants.js';
 import type {ParsedAddress, AssembleInput} from '../interfaces/index.js';
 import type {ComponentField} from '../types/index.js';
+import {SUBUNIT_LABELS, GUARD_ONLY_SUBUNIT_LABELS} from './subunit-labels.js';
 
 function titleCase(s: string): string {
   return s.replace(/\b\w/g, (c) => c.toUpperCase());
@@ -18,9 +19,12 @@ const FLOOR = new RegExp(
   'i'
 );
 
-// "Unit 4", "Flat 12-B", "Shop No. 7" — a sub-unit, not a locality.
-const SUBUNIT =
-  /^(?:unit|flat|shop|room|apartment|apt|suite|portion)\b[\s.:#-]*(?:no\.?)?[\s.:#-]*\d+\s*[a-z]?$/i;
+// "Unit 4", "Flat 12-B", "Shop No. 7" — a sub-unit, not a locality. Built from
+// the same vocabulary as the `unit` component rule so the two cannot drift.
+const SUBUNIT = new RegExp(
+  `^(?:${[...SUBUNIT_LABELS, ...GUARD_ONLY_SUBUNIT_LABELS].join('|')})\\b[\\s.:#-]*(?:no\\.?)?[\\s.:#-]*\\d+\\s*[a-z]?$`,
+  'i'
+);
 
 /**
  * Is a leftover run plausibly a locality name?

@@ -80,7 +80,10 @@ describe('extractPhone — contact labels are consumed with the number', () => {
     it(`consumes the label in "${input}"`, () => {
       const {phone, remainder} = extractPhone(`Lahore, ${input}`);
       expect(phone).toBe('03001234567');
-      expect(remainder.trim()).toBe('Lahore,');
+      // The label must be gone, not merely the digits — a surviving label is
+      // what the area fallback would promote to the locality.
+      expect(remainder).toContain('Lahore');
+      expect(remainder.replace('Lahore', '')).not.toMatch(/\p{L}/u);
     });
   }
 

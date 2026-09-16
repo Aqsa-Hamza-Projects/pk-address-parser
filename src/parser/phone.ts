@@ -20,13 +20,14 @@ const CANDIDATE = new RegExp(
 // the number so it is blanked too; otherwise "Mob 0300-1234567" leaves "Mob"
 // as a leftover and the area fallback promotes it to the locality.
 const LABEL_BEFORE =
-  /\b(?:ph|phone|mob|mobile|cell|tel|telephone|contact|whatsapp|uan)\b\.?\s*(?:no\.?)?\s*[:#.-]*\s*$/i;
+  /\b(?:ph|phone|mob|mobile|cell|tel|telephone|contact|whatsapp|uan)\b\.?\s*(?:no\.?)?\s*[:#.,-]*\s*$/i;
 
-// A label that means the digits are NOT a phone. Some land-record and
-// accounting numbers are shaped exactly like a landline, so the label is the
-// only signal; extracting one would delete it from the address.
+// A label that means the digits are NOT a phone. Land-record and identity
+// numbers are shaped exactly like a landline, so the label is the only signal.
+// Deliberately narrow: when this fires a real number disappears silently, so it
+// lists only terms that genuinely collide with landline shape.
 const NOT_A_PHONE_BEFORE =
-  /\b(?:khasra|khewat|khata|survey|account|acc|a\/c|invoice|receipt|order|ref|reference|cnic|nic)\b\.?\s*(?:no\.?)?\s*[:#.-]*\s*$/i;
+  /\b(?:khasra|khewat|khata|survey|cnic|nic)\b\.?\s*(?:no\.?)?\s*[:#.-]*\s*$/i;
 
 const MOBILE = /^03\d{9}$/;
 // Landline: trunk `0`, then an area code. No PK area code starts with 0 or 1,

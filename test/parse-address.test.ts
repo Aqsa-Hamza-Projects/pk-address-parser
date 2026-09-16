@@ -196,6 +196,7 @@ describe('parseAddress — a contact label never becomes the locality (PR-A1)', 
     'House 5, G-11/2, Islamabad, Mob 0300-1234567',
     'House 5, G-11/2, Islamabad, Ph# 0300-1234567',
     'House 5, G-11/2, Islamabad, UAN 042-111-123-456',
+    'House 5, G-11/2, Islamabad, Mob, 0300-1234567',
   ];
   for (const address of labelled) {
     it(`does not put the label in area: "${address.slice(24)}"`, () => {
@@ -213,6 +214,8 @@ describe('parseAddress — floor and unit descriptors go to unmatched (PR-A1)', 
     'Basement',
     'Floor 2',
     'Unit 4 B',
+    'Office 5',
+    'Suite 9',
   ];
   for (const d of descriptors) {
     it(`"${d}" is not an area`, () => {

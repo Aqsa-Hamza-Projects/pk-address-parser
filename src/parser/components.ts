@@ -4,6 +4,7 @@ import type {
   ComponentResult,
   ComponentRule,
 } from '../interfaces/index.js';
+import {SUBUNIT_LABELS} from './subunit-labels.js';
 
 const ROMAN: Record<string, string> = {
   i: '1',
@@ -73,7 +74,10 @@ const RULES: ComponentRule[] = [
   },
   {
     field: 'unit',
-    re: /\b((?:flat|apartment|suite|room|shop|office)\s*(?:\.?\s*no\.?)?\s*[:#.-]?\s*(?:[0-9]+(?:-[a-z0-9]+)?|[a-z]-[0-9]{1,2}))/i,
+    re: new RegExp(
+      `\\b((?:${SUBUNIT_LABELS.join('|')})\\s*(?:\\.?\\s*no\\.?)?\\s*[:#.-]?\\s*(?:[0-9]+(?:-[a-z0-9]+)?|[a-z]-[0-9]{1,2}))`,
+      'i'
+    ),
     transform: unitLabel,
   },
   {
