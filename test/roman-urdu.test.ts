@@ -60,3 +60,11 @@ describe('bare locality labels', () => {
     expect(r.unmatched).toContain('ahmed');
   });
 });
+
+describe('makaan spelling', () => {
+  it('accepts the double-a spelling', () => {
+    const r = parseAddress({address: 'makaan 12 gali 5 johar town lahore'});
+    expect(r.house).toBe('12');
+    expect(r.street).toBe('5');
+  });
+});

@@ -344,6 +344,17 @@ network.
   `"St Johns"` normalizes to `"Street Johns"`.
 - **One `area` slot and one `unit` slot.** Extra locality or unit descriptors
   (e.g. a second `"2nd Floor"` after a `"Flat 3"`) go to `unmatched`.
+- **A bare locality label is only dropped from a clean remainder.** `mohalla`,
+  `goth`, `basti` and friends are removed from `unmatched` only when the
+  gazetteer resolved the area _and_ nothing else is left over, so
+  `mohalla islampura sialkot` gives `unmatched: []` but
+  `mohalla islampura near masjid sialkot` still keeps `mohalla`. The label has
+  no position information by then, so dropping it while other tokens remain
+  could discard a word belonging to a different phrase.
+- **A Roman-Urdu label is ignored when a word precedes it**, so a locality
+  named after one survives a trailing number: `Sund Gali 5` stays
+  `area: 'Sund Gali'` with `5` in `unmatched`, rather than becoming `Sund` plus
+  street `5`. The cost is that `johar town gali 5` does not parse the street.
 - **A bare multi-city society name** (`"DHA"`, `"Cantt"`) with no city token
   will not resolve a `city` or `province` — it would otherwise have to guess one
   arbitrarily. Pass `defaultCity` or include the city in the input.

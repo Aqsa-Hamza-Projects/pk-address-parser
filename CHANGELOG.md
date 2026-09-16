@@ -14,14 +14,17 @@ grouped into _Added_ / _Changed_ / _Fixed_ / _Removed_.
 ### Added
 
 - Roman-Urdu house and street labels (`makan`, `ghar`, `bangla`, `bunglow`,
-  `bungalow`, `villa`, `gali`, `galli`, `koocha`, `kucha`, `lane`) and the
-  number words `no`/`nos`/`num`/`nmbr`/`number`, so
+  `bungalow`, `villa`, `makaan`, `gali`, `galli`, `koocha`, `kucha`, `lane`)
+  and the number words `no`/`nos`/`num`/`nmbr`/`number`, so
   `makan no 12 gali 5 johar town lahore` now yields `house: '12'`,
   `street: '5'`. A label is matched only when a number follows it, so the
   several hundred localities whose names contain one — `Makan Bagh`,
   `Sund Gali`, `Ghanta Ghar`, `Qasim Lane`, 188 places beginning `Goth …` —
-  are unaffected. Pinned by a test that runs both rules over all 4,281
-  gazetteer names and aliases and asserts zero matches.
+  are unaffected. A Roman-Urdu label is additionally ignored when a word
+  precedes it, so a locality that _ends_ in a label word survives a trailing
+  number too: `Sund Gali 5` stays `area: 'Sund Gali'`. Pinned by a test that
+  runs the rules over all 4,281 gazetteer names and aliases, bare and with a
+  number appended, and asserts zero matches.
 - Roman-Urdu landmark prepositions: `qareeb`, `kareeb`, `nazdeek`, `k paas`,
   `k samne`, `k pichay`, `k saath` (and the `ke` spellings), plus `nearby`,
   `near by`, `next to` and `close to`. All canonicalize to the English term the

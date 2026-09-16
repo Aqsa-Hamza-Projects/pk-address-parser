@@ -2,22 +2,41 @@ import {describe, it, expect} from 'vitest';
 import {
   HOUSE_LABELS,
   STREET_LABELS,
+  HOUSE_LABELS_URDU,
+  STREET_LABELS_URDU,
   NUMBER_WORDS,
   LOCALITY_LABELS,
   stripLocalityLabels,
 } from '../src/parser/labels.js';
 
 describe('vocabulary', () => {
-  it('carries the Roman-Urdu house labels alongside the English ones', () => {
-    for (const w of ['house', 'kothi', 'plot', 'makan', 'ghar', 'bangla']) {
+  it('keeps the pre-existing English labels in their own list', () => {
+    for (const w of ['house', 'hno', 'h', 'kothi', 'plot']) {
       expect(HOUSE_LABELS).toContain(w);
+    }
+    expect(STREET_LABELS).toEqual(['street', 'st']);
+  });
+
+  it('carries the Roman-Urdu house labels, both makan spellings', () => {
+    for (const w of ['makan', 'makaan', 'ghar', 'bangla', 'bungalow']) {
+      expect(HOUSE_LABELS_URDU).toContain(w);
     }
   });
 
   it('carries the Roman-Urdu street labels', () => {
-    for (const w of ['street', 'st', 'gali', 'galli', 'koocha', 'lane']) {
-      expect(STREET_LABELS).toContain(w);
+    for (const w of ['gali', 'galli', 'koocha', 'kucha', 'lane']) {
+      expect(STREET_LABELS_URDU).toContain(w);
     }
+  });
+
+  // The two lists are matched by different rules — the Roman-Urdu one adds a
+  // leading-word guard — so a word in both would get the looser treatment.
+  it('does not repeat a label across the English and Roman-Urdu lists', () => {
+    const urdu = new Set([...HOUSE_LABELS_URDU, ...STREET_LABELS_URDU]);
+    const overlap = [...HOUSE_LABELS, ...STREET_LABELS].filter((w) =>
+      urdu.has(w)
+    );
+    expect(overlap).toEqual([]);
   });
 
   it('carries the number words', () => {
