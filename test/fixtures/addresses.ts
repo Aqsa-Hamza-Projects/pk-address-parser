@@ -8,8 +8,8 @@ export interface Fixture {
 /**
  * Real-world Pakistani addresses. Every `expect` field below is asserted
  * verbatim against the shipped gazetteer (204 cities / 3230 areas). Where the
- * gazetteer's canonical form differs from the colloquial input (e.g. "Iqbal
- * Town" -> "Allama Iqbal Town", "Defence" -> "DHA", "Malir" -> "Malir City")
+ * gazetteer's canonical form differs from the colloquial input (e.g.
+ * "Defence" -> "DHA", "Malir" -> "Malir City")
  * the expectation uses the canonical form the parser actually returns.
  */
 export const fixtures: Fixture[] = [
@@ -130,7 +130,11 @@ export const fixtures: Fixture[] = [
   },
   {
     input: 'Iqbal Town, Lahore',
-    expect: {area: 'Allama Iqbal Town', city: 'Lahore', province: 'Punjab'},
+    // PR-A3: overrides.json curates "Iqbal Town" as the canonical Lahore name
+    // with "Allama Iqbal Town" as its alias. Before the override-outranks-alias
+    // invariant this returned the GeoNames spelling instead, contradicting the
+    // curation; it now returns the curated one.
+    expect: {area: 'Iqbal Town', city: 'Lahore', province: 'Punjab'},
   },
   {
     input: 'House 3, Askari 10, Lahore',

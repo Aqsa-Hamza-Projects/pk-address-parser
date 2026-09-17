@@ -379,6 +379,27 @@ async function main(): Promise<void> {
     });
   }
 
+  // Within a city an override claims, a curated area name outranks a GeoNames
+  // alternate name. Without this, plain "Latifabad" existed in the gazetteer
+  // only as an alternate name of the record "Latifabad Number Ten", so every
+  // bare "Latifabad, Hyderabad" resolved to Unit 10 specifically.
+  //
+  // Scoped per (name, city), NOT globally: "Model Town" is an override for
+  // Lahore but also a legitimate GeoNames alias of "New Town" in Hyderabad,
+  // and dropping that one would lose "Model Town, Hyderabad" entirely. An
+  // override only speaks for the cities it lists.
+  //
+  // The numbered Latifabad records — and the word "number" — are untouched.
+  const overrideAreaKeys = new Set<string>();
+  for (const o of overrides.areas)
+    for (const c of o.cities)
+      overrideAreaKeys.add(`${foldKey(o.name)}|${foldKey(c)}`);
+  for (const a of areas) {
+    a.aliases = a.aliases.filter(
+      (al) => !overrideAreaKeys.has(`${foldKey(al)}|${foldKey(a.city)}`)
+    );
+  }
+
   // merge overrides.areas (kept unconditionally)
   for (const ov of overrides.areas) {
     for (const cityName of ov.cities) {
