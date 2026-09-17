@@ -32,6 +32,27 @@ describe('named-parameters contract', () => {
     expect(api.listProvinces()).toHaveLength(7);
   });
 
+  it('ParsedAddress has exactly the documented fields, in declared order', () => {
+    expect(Object.keys(api.parseAddress({address: 'Lahore'}))).toEqual([
+      'house',
+      'street',
+      'block',
+      'sector',
+      'phase',
+      'unit',
+      'chak',
+      'landmark',
+      'area',
+      'city',
+      'province',
+      'country',
+      'phone',
+      'raw',
+      'unmatched',
+      'confidence',
+    ]);
+  });
+
   it('exports exactly the documented surface', () => {
     expect(Object.keys(api).sort()).toEqual(
       [

@@ -69,6 +69,11 @@ export function computeConfidence(
   // A guessed (non-gazetteer) area is not evidence — no credit, plus a penalty
   // so `confidence` still flags the address for review.
   if (r.area && areaFromFallback) score -= 0.1;
+  // In a canal-colony address the chak number IS the locality, and unlike a
+  // guessed area it is self-validating (number + canal-branch code, a closed
+  // format). It therefore scores like a gazetteer area — but only when no area
+  // resolved: the two are alternative locality evidence, never additive.
+  if (r.chak && !r.area) score += 0.15;
   let comp = 0;
   for (const f of ['house', 'street', 'block', 'sector', 'phase'] as const) {
     if (r[f]) comp += 0.05;

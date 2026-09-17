@@ -9,6 +9,7 @@ export function emptyResult(raw: string): ParsedAddress {
     sector: null,
     phase: null,
     unit: null,
+    chak: null,
     landmark: null,
     area: null,
     city: null,

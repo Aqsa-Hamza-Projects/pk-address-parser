@@ -48,6 +48,19 @@ function floorLabel(raw: string): string {
 // Order matters: labeled sector before block; bare sector after block/unit;
 // house label before bare '#'.
 const RULES: ComponentRule[] = [
+  // Punjab canal-colony chak number: `Chak No. 123/GB`, `Chak 45/JB`,
+  // `Chak 7/1-L`. Two guards, each needed, each verified against all 4,281
+  // gazetteer names (see test/a3-corpus.test.ts):
+  //   * lookbehind — `chak` must start its comma segment, so the real names
+  //     `Dera Gardawar Chak 108/P` and `Basti Blochan Chak 55p.` are not eaten;
+  //   * the second alternative refuses a number followed by another word, so
+  //     the real names `Chak 46 NB` / `Chak 42 NB` keep resolving as areas.
+  // Runs first so the slash-bearing value cannot be nibbled by a later rule.
+  {
+    field: 'chak',
+    re: /(?<=(?:^|,)\s*)chak\s*(?:no\.?|#)?\s*(\d{1,4}[/-][0-9A-Za-z][0-9A-Za-z-]*|\d{1,4}(?!\s*[0-9A-Za-z]))/i,
+    transform: (s) => s.toUpperCase(),
+  },
   {
     field: 'house',
     re: /\b(?:house|hno|kothi|plot|h)\b\s*(?:\.?\s*no\.?)?\s*[:#.-]?\s*([0-9]+[a-z]?(?:[/-][0-9a-z]+)*)/i,
