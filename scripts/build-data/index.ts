@@ -390,10 +390,22 @@ async function main(): Promise<void> {
   // override only speaks for the cities it lists.
   //
   // The numbered Latifabad records — and the word "number" — are untouched.
+  // Narrowed further: only when the override name has NO record of its own in
+  // that city. That is the case the override is actually repairing — a curated
+  // name that exists solely as somebody else's alternate name. Where a record
+  // with that name already exists (`Iqbal Town` in Lahore), the key is already
+  // unambiguous enough and dropping the alias would silently change canonical
+  // output for a locality unrelated to this fix. Keeps the blast radius to
+  // exactly one alias, asserted in test/data.test.ts.
+  const existingNameKeys = new Set(
+    areas.map((a) => `${foldKey(a.name)}|${foldKey(a.city)}`)
+  );
   const overrideAreaKeys = new Set<string>();
   for (const o of overrides.areas)
-    for (const c of o.cities)
-      overrideAreaKeys.add(`${foldKey(o.name)}|${foldKey(c)}`);
+    for (const c of o.cities) {
+      const key = `${foldKey(o.name)}|${foldKey(c)}`;
+      if (!existingNameKeys.has(key)) overrideAreaKeys.add(key);
+    }
   for (const a of areas) {
     a.aliases = a.aliases.filter(
       (al) => !overrideAreaKeys.has(`${foldKey(al)}|${foldKey(a.city)}`)
