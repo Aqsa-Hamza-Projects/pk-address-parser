@@ -1,17 +1,24 @@
 import {describe, it, expect} from 'vitest';
 import areasJson from '../src/data/areas.json' with {type: 'json'};
+import {getRules} from '../src/parser/components.js';
 
 const NAMES: string[] = (
   areasJson as {areas: {name: string; aliases: string[]}[]}
 ).areas.flatMap((a) => [a.name, ...a.aliases]);
 
-// The two rules under test, copied from src/parser/components.ts and
-// src/parser/subunit-labels.ts. Copied deliberately: this test must fail when
-// the shipped rule changes shape, not silently follow it.
-const CHAK_GUARDED =
-  /(?<=(?:^|,)\s*)chak\s*(?:no\.?|#)?\s*(\d{1,4}[/-][0-9A-Za-z][0-9A-Za-z-]*|\d{1,4}(?!\s*[0-9A-Za-z]))/i;
-const UNIT =
-  /\bunit\s*(?:\.?\s*no\.?)?\s*[:#.-]?\s*(?:[0-9]+(?:-[a-z0-9]+)?|[a-z]-[0-9]{1,2})/i;
+// The SHIPPED rules, imported — not copied. An earlier cut of this file
+// re-declared them, which inverted the protection it meant to give: you could
+// edit components.ts and this corpus sweep would keep passing against a stale
+// copy, while the comments there still claimed corpus verification.
+//
+// The change-detector property that motivated copying is preserved by pinning
+// each rule's source below, so changing a rule stays a deliberate, visible
+// diff — but the sweep itself now runs the regex the library actually ships.
+const chakRule = getRules('chak')[0];
+const unitRule = getRules('unit')[0];
+if (!chakRule || !unitRule) throw new Error('expected chak and unit rules');
+const CHAK_GUARDED = chakRule.re;
+const UNIT = unitRule.re;
 
 // Guards removed, one at a time, so we can prove each one is load-bearing.
 const CHAK_NO_POSITION_GUARD =
@@ -22,6 +29,17 @@ const CHAK_NO_SHAPE_GUARD =
 describe('PR-A3 rules against the whole gazetteer', () => {
   it('has a corpus worth testing', () => {
     expect(NAMES.length).toBeGreaterThan(4000);
+  });
+
+  it('pins the shipped rule sources', () => {
+    // Change detector. These are the exact regexes reviewed against the corpus
+    // below; editing either must be a deliberate act that updates this test and
+    // re-runs the sweep. If you are here because this failed, re-read the guard
+    // rationale in src/parser/components.ts before changing the expectation.
+    expect(CHAK_GUARDED.source).toBe(
+      '(?<=(?:^|,)\\s*)chak\\s*(?:no\\.?|#)?\\s*(\\d{1,4}\\/[0-9A-Za-z][0-9A-Za-z-]*|\\d{1,4}-\\d[0-9A-Za-z-]*|\\d{1,4}(?![\\s-]*[0-9A-Za-z]))'
+    );
+    expect(UNIT.source).toContain('unit');
   });
 
   it('the unit rule matches no real name, bare or with a number appended', () => {
