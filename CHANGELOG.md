@@ -23,6 +23,20 @@ grouped into _Added_ / _Changed_ / _Fixed_ / _Removed_.
   `Ref`) are left in place, in the address text, rather than extracted. The
   list is exhaustive on purpose: anything not on it that is shaped like a
   landline will be treated as one.
+- `chak` on `ParsedAddress`: Punjab canal-colony numbering (`'123/GB'`,
+  `'45/JB'`, `'7/1-L'`). `normalizeAddress` emits `Chak <n>`, and a resolved
+  chak counts as locality evidence for `confidence`. The rule is guarded so
+  real gazetteer localities such as `Chak 46 NB` and `Dera Gardawar Chak 108/P`
+  still resolve as areas.
+- Hyderabad's `Unit N` sub-division is captured into `unit` with its label
+  preserved (`'Unit 7'`) instead of falling into `unmatched`.
+
+### Changed
+
+- `Iqbal Town, Lahore` now returns the curated area name `'Iqbal Town'` rather
+  than the GeoNames spelling `'Allama Iqbal Town'`, which `overrides.json` had
+  always declared an alias. Consequence of the override-outranks-alias rule
+  above.
 
 ### Fixed
 
@@ -31,6 +45,11 @@ grouped into _Added_ / _Changed_ / _Fixed_ / _Removed_.
   descriptor (`2nd Floor`, `Ground Floor`, `Basement`) or a sub-unit
   (`Unit 4`, `Shop No. 7`) now goes to `unmatched` instead of becoming the
   locality.
+- Plain `Latifabad, Hyderabad` resolved to `Latifabad Number Ten`, because
+  GeoNames listed `Latifabad` only as an alternate name of that record. It is
+  now its own gazetteer entry, and the data generator drops any alternate name
+  that collides with a curated override area name in a city that override
+  claims. The numbered Latifabad variants are unchanged.
 
 ## [0.0.3] — 2026-09-10
 

@@ -247,29 +247,59 @@ isCity({name: 'Gotham'}); // false
 
 ### `ParsedAddress`
 
-| Field        | Type             | Notes                                                                      |
-| ------------ | ---------------- | -------------------------------------------------------------------------- |
-| `house`      | `string \| null` | Value only — `'23'`, `'5-A'`, `'23'` from `#23` / `Plot 5`                 |
-| `street`     | `string \| null` | Value only — `'4'` from `Street 4` / `St 4` / `St. 4`                      |
-| `block`      | `string \| null` | Value only, upper-cased — `'B'`, `'12-C'`                                  |
-| `sector`     | `string \| null` | Value only, upper-cased — `'F-8/3'`, `'G-9'` (Islamabad / Karachi)         |
-| `phase`      | `string \| null` | Value only — `'6'`; Roman numerals folded to digits (`II` → `'2'`)         |
-| `unit`       | `string \| null` | `'Flat 3'`, `'Apartment 12-C'`, `'2nd Floor'`, `'Shop 4'`                  |
-| `landmark`   | `string \| null` | Keeps its preposition — `'Near Emporium Mall'`, `'Opposite ...'`           |
-| `area`       | `string \| null` | Resolved locality, canonical gazetteer name — `'Johar Town'`               |
-| `city`       | `string \| null` | Resolved / inferred city — `'Lahore'`                                      |
-| `province`   | `string \| null` | Resolved / inferred province — `'Punjab'`                                  |
-| `country`    | `'Pakistan'`     | Constant                                                                   |
-| `phone`      | `string \| null` | PK mobile / landline found in the input, national digits — `'03001234567'` |
-| `raw`        | `string`         | The original input, untouched                                              |
-| `unmatched`  | `string[]`       | Tokens that could not be classified (original casing)                      |
-| `confidence` | `number`         | `0`–`1` heuristic — **advisory only**, not a probability                   |
+| Field        | Type             | Notes                                                                                                    |
+| ------------ | ---------------- | -------------------------------------------------------------------------------------------------------- |
+| `house`      | `string \| null` | Value only — `'23'`, `'5-A'`, `'23'` from `#23` / `Plot 5`                                               |
+| `street`     | `string \| null` | Value only — `'4'` from `Street 4` / `St 4` / `St. 4`                                                    |
+| `block`      | `string \| null` | Value only, upper-cased — `'B'`, `'12-C'`                                                                |
+| `sector`     | `string \| null` | Value only, upper-cased — `'F-8/3'`, `'G-9'` (Islamabad / Karachi)                                       |
+| `phase`      | `string \| null` | Value only — `'6'`; Roman numerals folded to digits (`II` → `'2'`)                                       |
+| `unit`       | `string \| null` | `'Flat 3'`, `'Apartment 12-C'`, `'2nd Floor'`, `'Shop 4'`, `'Unit 7'` — label preserved                  |
+| `chak`       | `string \| null` | Punjab canal-colony number — `'123/GB'`, `'45/JB'`, `'7/1-L'`; usually the locality, so `area` is `null` |
+| `landmark`   | `string \| null` | Keeps its preposition — `'Near Emporium Mall'`, `'Opposite ...'`                                         |
+| `area`       | `string \| null` | Resolved locality, canonical gazetteer name — `'Johar Town'`                                             |
+| `city`       | `string \| null` | Resolved / inferred city — `'Lahore'`                                                                    |
+| `province`   | `string \| null` | Resolved / inferred province — `'Punjab'`                                                                |
+| `country`    | `'Pakistan'`     | Constant                                                                                                 |
+| `phone`      | `string \| null` | PK mobile / landline found in the input, national digits — `'03001234567'`                               |
+| `raw`        | `string`         | The original input, untouched                                                                            |
+| `unmatched`  | `string[]`       | Tokens that could not be classified (original casing)                                                    |
+| `confidence` | `number`         | `0`–`1` heuristic — **advisory only**, not a probability                                                 |
 
 **`confidence` is advisory.** It is a rough `[0, 1]` score:
-`+0.35` province, `+0.30` city, `+0.15` area, `+0.05` each for house / street /
+`+0.35` province, `+0.30` city, `+0.15` area (or `+0.15` for a `chak` when no
+area resolved — they are alternative locality evidence, never additive),
+`+0.05` each for house / street /
 block / sector / phase (capped at `+0.20`), minus `0.15 × min(unmatched, 3) / 3`,
 clamped and rounded to 2 decimals. Use it to triage / flag addresses for review,
 not as a hard gate.
+
+### Rural Punjab: chak numbers
+
+Canal-colony addresses are numbered by chak, not by street:
+
+```ts
+parseAddress({address: 'House 12, Chak 45/JB, Faisalabad'});
+// { house: '12', chak: '45/JB', city: 'Faisalabad', province: 'Punjab', … }
+
+normalizeAddress({address: 'Chak No. 123/GB, Faisalabad'});
+// 'Chak 123/GB, Faisalabad, Punjab, Pakistan'
+```
+
+The rule only fires when `chak` begins its comma segment and the number is not
+followed by a separate word, so real gazetteer localities such as `Chak 46 NB`
+and `Dera Gardawar Chak 108/P` keep resolving as areas.
+
+### Hyderabad: Unit N
+
+```ts
+parseAddress({address: 'Latifabad Unit 7, Hyderabad'});
+// { unit: 'Unit 7', area: 'Latifabad', city: 'Hyderabad', … }
+```
+
+Plain `Latifabad` now resolves to Latifabad rather than to `Latifabad Number
+Ten`. The numbered variants (`Latifabad Number Seven`, `Unit Number Two`, …)
+are unchanged.
 
 ## Data & coverage
 
