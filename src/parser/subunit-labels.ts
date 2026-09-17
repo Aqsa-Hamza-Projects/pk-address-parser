@@ -13,13 +13,17 @@ export const SUBUNIT_LABELS = [
   'room',
   'shop',
   'office',
+  // Hyderabad's formal sub-division designation (Latifabad Units 1-12).
+  // Safe to capture unconditionally: of the 4,281 gazetteer names, none ends
+  // in `unit` and none has `unit` followed by a digit — the real records spell
+  // the numeral out ("Latifabad Unit Number Four"). See test/a3-corpus.test.ts.
+  'unit',
 ] as const;
 
 /**
  * Labels the area guard also refuses, but which have no capture rule yet.
  *
- * `unit` is Hyderabad's sub-division designation (a `unit` rule for it belongs
- * with the other Hyderabad work); `apt` and `portion` are informal. None of
- * them is a locality name, so none may reach `area`.
+ * `apt` and `portion` are informal. Neither is a locality name, so neither may
+ * reach `area`. (`unit` graduated to SUBUNIT_LABELS in PR-A3.)
  */
-export const GUARD_ONLY_SUBUNIT_LABELS = ['unit', 'apt', 'portion'] as const;
+export const GUARD_ONLY_SUBUNIT_LABELS = ['apt', 'portion'] as const;
