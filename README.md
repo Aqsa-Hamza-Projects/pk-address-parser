@@ -286,9 +286,24 @@ normalizeAddress({address: 'Chak No. 123/GB, Faisalabad'});
 // 'Chak 123/GB, Faisalabad, Punjab, Pakistan'
 ```
 
-The rule only fires when `chak` begins its comma segment and the number is not
-followed by a separate word, so real gazetteer localities such as `Chak 46 NB`
-and `Dera Gardawar Chak 108/P` keep resolving as areas.
+Commas are optional — `House 12 Chak 45/JB Faisalabad` works too.
+
+**Limits, so the gaps are not surprises:**
+
+- The value is an **opaque string**. `'123/GB'` is not split into number and
+  canal branch; if you need to route by branch, parse it yourself. Splitting it
+  is deliberately out of scope for now.
+- Chak numbering is a **Punjab** system. A village number elsewhere is not
+  recognized as a chak.
+- A chak must not be preceded by a word in its segment, and its number must not
+  be followed by a separate word, so real gazetteer localities such as
+  `Chak 46 NB`, `Chak 46-NB` and `Dera Gardawar Chak 108/P` keep resolving as
+  areas. The cost is that a locality-prefixed form like `Village Chak 45/JB` is
+  read as a place name rather than a chak.
+- Numbers above four digits are not chaks (real ones top out in the hundreds).
+- **One chak per address.** A second one goes to `unmatched`.
+- A chak inside a landmark segment (`Near Chak No. 123/GB`) stays part of the
+  landmark and is not extracted.
 
 ### Hyderabad: Unit N
 
@@ -300,6 +315,10 @@ parseAddress({address: 'Latifabad Unit 7, Hyderabad'});
 Plain `Latifabad` now resolves to Latifabad rather than to `Latifabad Number
 Ten`. The numbered variants (`Latifabad Number Seven`, `Unit Number Two`, …)
 are unchanged.
+
+`unit` does not contribute to `confidence`, by design — no sub-unit field
+(`Flat`, `Shop`, `Unit`, a floor) does, because a sub-unit says nothing about
+whether the _place_ was identified.
 
 ## Data & coverage
 
@@ -338,8 +357,9 @@ network.
   review.
 - **A leading `"St"` is expanded to `"Street"`** by abbreviation handling, so
   `"St Johns"` normalizes to `"Street Johns"`.
-- **One `area` slot and one `unit` slot.** Extra locality or unit descriptors
-  (e.g. a second `"2nd Floor"` after a `"Flat 3"`) go to `unmatched`.
+- **One `area` slot, one `unit` slot and one `chak` slot.** Extra locality,
+  unit or chak descriptors (a second `"2nd Floor"` after a `"Flat 3"`, a second
+  `Chak`) go to `unmatched`.
 - **A bare multi-city society name** (`"DHA"`, `"Cantt"`) with no city token
   will not resolve a `city` or `province` — it would otherwise have to guess one
   arbitrarily. Pass `defaultCity` or include the city in the input.
