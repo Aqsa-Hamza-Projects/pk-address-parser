@@ -26,8 +26,12 @@ const LABEL_BEFORE =
 // numbers are shaped exactly like a landline, so the label is the only signal.
 // Deliberately narrow: when this fires a real number disappears silently, so it
 // lists only terms that genuinely collide with landline shape.
+// Accounting labels are here for the same reason as the land-record ones: an
+// invoice or account number is shaped exactly like a landline, and the CHANGELOG
+// already promised they were safe while the code did not list them, so
+// `Invoice 0421234567, Saddar, Karachi` silently lost the invoice number.
 const NOT_A_PHONE_BEFORE =
-  /\b(?:khasra|khewat|khata|survey|cnic|nic)\b\.?\s*(?:no\.?)?\s*[:#.-]*\s*$/i;
+  /\b(?:khasra|khewat|khata|survey|cnic|nic|account|acct|invoice|bill|receipt|order|ref|reference)\b\.?\s*(?:no\.?)?\s*[:#.-]*\s*$/i;
 
 const MOBILE = /^03\d{9}$/;
 // Landline: trunk `0`, then an area code. No PK area code starts with 0 or 1,

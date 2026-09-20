@@ -19,7 +19,10 @@ grouped into _Added_ / _Changed_ / _Fixed_ / _Removed_.
   Accepts `+92`, `0092` and `92` prefixes with spaces, dots, dashes and
   parentheses, and consumes a leading contact label (`Mob`, `Ph:`, `UAN`…).
   Numbers carrying a land-record or accounting label (`Khasra`, `Khewat`,
-  `Account`, `Invoice`…) are left in place.
+  `Khata`, `Survey`, `CNIC`, `Account`, `Invoice`, `Bill`, `Receipt`, `Order`,
+  `Ref`) are left in place, in the address text, rather than extracted. The
+  list is exhaustive on purpose: anything not on it that is shaped like a
+  landline will be treated as one.
 
 ### Fixed
 

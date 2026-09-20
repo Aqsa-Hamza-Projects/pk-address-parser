@@ -115,6 +115,18 @@ describe('extractPhone — does not swallow non-phone numbers', () => {
     ['Khewat No 0456789012, Lahore', 'a khewat number'],
     ['Invoice 2024-0012345678, Lahore', 'an invoice number (area code 0)'],
     ['Plot 5, 0.123456789, Lahore', 'a decimal'],
+    // The cases above all survive because their SHAPE fails, not because of the
+    // label — `Invoice 2024-0012345678` has area code 0, which LANDLINE already
+    // rejects. That hid a real gap: the CHANGELOG promised `Account` and
+    // `Invoice` were safe, but neither was in NOT_A_PHONE_BEFORE, so a
+    // landline-shaped one was silently deleted from the address. These exercise
+    // the label itself — every one is a valid landline shape (area code 42).
+    ['Account 0421234567, Saddar, Karachi', 'an account number'],
+    ['Invoice 0421234567, Saddar, Karachi', 'a landline-shaped invoice number'],
+    ['Order No. 0421234567, Lahore', 'an order number'],
+    ['Ref 0421234567, Lahore', 'a reference number'],
+    ['Receipt 0421234567, Lahore', 'a receipt number'],
+    ['Bill 0421234567, Lahore', 'a bill number'],
   ];
   for (const [input, why] of keep) {
     it(`does not treat ${why} as a phone`, () => {
@@ -126,5 +138,21 @@ describe('extractPhone — does not swallow non-phone numbers', () => {
     expect(extractPhone('Khasra 0123456789, call 0300-1234567').phone).toBe(
       '03001234567'
     );
+  });
+
+  it('a suppressed number stays in the text rather than disappearing', () => {
+    // The point of the guard is that the digits survive for the caller to see.
+    const r = extractPhone('Account 0421234567, Saddar, Karachi');
+    expect(r.phone).toBeNull();
+    expect(r.remainder).toContain('0421234567');
+  });
+
+  it('the accounting labels do not block a genuine contact number', () => {
+    // `contact`/`ph`/`mob` are phone labels, not accounting ones — adding the
+    // accounting terms must not shadow them.
+    expect(extractPhone('Contact 0300-1234567, Lahore').phone).toBe(
+      '03001234567'
+    );
+    expect(extractPhone('Ph: 042-35714090, Lahore').phone).toBe('04235714090');
   });
 });
