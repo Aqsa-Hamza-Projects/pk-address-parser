@@ -11,18 +11,10 @@ grouped into _Added_ / _Changed_ / _Fixed_ / _Removed_.
 
 ## [Unreleased]
 
+## [0.0.6] — 2026-09-24
+
 ### Added
 
-- Automated OIDC npm publishing workflow via GitHub Actions (`.github/workflows/publish.yml`).
-- `phone` on `ParsedAddress`: Pakistani mobile, landline and UAN numbers are
-  extracted before parsing and normalized to national digits (`03001234567`).
-  Accepts `+92`, `0092` and `92` prefixes with spaces, dots, dashes and
-  parentheses, and consumes a leading contact label (`Mob`, `Ph:`, `UAN`…).
-  Numbers carrying a land-record or accounting label (`Khasra`, `Khewat`,
-  `Khata`, `Survey`, `CNIC`, `Account`, `Invoice`, `Bill`, `Receipt`, `Order`,
-  `Ref`) are left in place, in the address text, rather than extracted. The
-  list is exhaustive on purpose: anything not on it that is shaped like a
-  landline will be treated as one.
 - `chak` on `ParsedAddress`: Punjab canal-colony numbering (`'123/GB'`,
   `'45/JB'`, `'7/1-L'`). `normalizeAddress` emits `Chak <n>`, and a resolved
   chak counts as locality evidence for `confidence`. The rule is guarded so
@@ -33,11 +25,6 @@ grouped into _Added_ / _Changed_ / _Fixed_ / _Removed_.
 
 ### Fixed
 
-- A leftover token run is no longer guessed as `area` unless it reads like a
-  place name. A pasted phone number, a bare number, a long digit run, a floor
-  descriptor (`2nd Floor`, `Ground Floor`, `Basement`) or a sub-unit
-  (`Unit 4`, `Shop No. 7`) now goes to `unmatched` instead of becoming the
-  locality.
 - Plain `Latifabad, Hyderabad` resolved to `Latifabad Number Ten`, because
   GeoNames listed `Latifabad` only as an alternate name of that record. It is
   now its own gazetteer entry, and the data generator drops an alternate name
@@ -51,6 +38,29 @@ grouped into _Added_ / _Changed_ / _Fixed_ / _Removed_.
 - A long run of vertical-tab or form-feed characters in the input is now
   collapsed with other whitespace, so a hostile paste can no longer make
   parsing quadratic.
+
+## [0.0.4] — 2026-09-24
+
+### Added
+
+- Automated OIDC npm publishing workflow via GitHub Actions (`.github/workflows/publish.yml`).
+- `phone` on `ParsedAddress`: Pakistani mobile, landline and UAN numbers are
+  extracted before parsing and normalized to national digits (`03001234567`).
+  Accepts `+92`, `0092` and `92` prefixes with spaces, dots, dashes and
+  parentheses, and consumes a leading contact label (`Mob`, `Ph:`, `UAN`…).
+  Numbers carrying a land-record or accounting label (`Khasra`, `Khewat`,
+  `Khata`, `Survey`, `CNIC`, `Account`, `Invoice`, `Bill`, `Receipt`, `Order`,
+  `Ref`) are left in place, in the address text, rather than extracted. The
+  list is exhaustive on purpose: anything not on it that is shaped like a
+  landline will be treated as one.
+
+### Fixed
+
+- A leftover token run is no longer guessed as `area` unless it reads like a
+  place name. A pasted phone number, a bare number, a long digit run, a floor
+  descriptor (`2nd Floor`, `Ground Floor`, `Basement`) or a sub-unit
+  (`Unit 4`, `Shop No. 7`) now goes to `unmatched` instead of becoming the
+  locality.
 
 ## [0.0.3] — 2026-09-10
 
