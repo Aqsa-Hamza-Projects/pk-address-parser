@@ -13,6 +13,12 @@ grouped into _Added_ / _Changed_ / _Fixed_ / _Removed_.
 
 ### Added
 
+- Automated OIDC npm publishing workflow via GitHub Actions (`.github/workflows/publish.yml`).
+
+## [0.0.5] — 2026-09-24
+
+### Added
+
 - Roman-Urdu house and street labels (`makan`, `ghar`, `bangla`, `bunglow`,
   `bungalow`, `villa`, `makaan`, `gali`, `galli`, `koocha`, `kucha`, `lane`)
   and the number words `no`/`nos`/`num`/`nmbr`/`number`, so
@@ -29,7 +35,6 @@ grouped into _Added_ / _Changed_ / _Fixed_ / _Removed_.
   `k samne`, `k pichay`, `k saath` (and the `ke` spellings), plus `nearby`,
   `near by`, `next to` and `close to`. All canonicalize to the English term the
   package already emits, so `qareeb X` and `near X` both give `Near X`.
-- Automated OIDC npm publishing workflow via GitHub Actions (`.github/workflows/publish.yml`).
 
 ### Changed
 
