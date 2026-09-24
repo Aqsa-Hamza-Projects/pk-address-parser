@@ -2,6 +2,7 @@ import {describe, it, expect} from 'vitest';
 import provinces from '../src/data/provinces.json' with {type: 'json'};
 import cities from '../src/data/cities.json' with {type: 'json'};
 import areas from '../src/data/areas.json' with {type: 'json'};
+import overrides from '../scripts/build-data/overrides.json' with {type: 'json'};
 
 const CANON = [
   'Punjab',
@@ -43,5 +44,104 @@ describe('bundled gazetteer', () => {
     );
     expect(cityNames.has('lahore')).toBe(true);
     expect(cityNames.has('karachi')).toBe(true);
+  });
+
+  it('plain "Latifabad" is its own record, not an alias of Unit 10', () => {
+    const hits = areas.areas.filter((a: {name: string; aliases: string[]}) =>
+      [a.name, ...a.aliases].some((n) => n.toLowerCase() === 'latifabad')
+    );
+    expect(hits).toHaveLength(1);
+    expect(hits[0]?.name).toBe('Latifabad');
+    expect(hits[0]?.city).toBe('Hyderabad');
+  });
+
+  it('the numbered Latifabad records are untouched', () => {
+    // 96 real area names contain "number". Nothing strips or rewrites it.
+    const names = new Set(
+      areas.areas.map((a: {name: string}) => a.name.toLowerCase())
+    );
+    for (const n of [
+      'latifabad number ten',
+      'latifabad number seven',
+      'latifabad number four',
+      'latifabad unit number two',
+    ]) {
+      expect(names.has(n)).toBe(true);
+    }
+    const withNumber = areas.areas
+      .flatMap((a: {name: string; aliases: string[]}) => [a.name, ...a.aliases])
+      .filter((n: string) => /\bnumber\b/i.test(n));
+    expect(withNumber.length).toBeGreaterThan(90);
+  });
+
+  it('a curated override name is never ONLY another record’s alias in a city it claims', () => {
+    // Generator invariant: within a city an override lists, the curated name
+    // must exist as a record in its own right — never solely as somebody
+    // else's alternate name, which is how plain "Latifabad" ended up meaning
+    // "Latifabad Number Ten".
+    //
+    // Scoped per (name, city): "Model Town" is an override for Lahore but a
+    // legitimate alias of "New Town" in Hyderabad, and that one must survive.
+    const ownNames = new Set(
+      areas.areas.map(
+        (a: {name: string; city: string}) =>
+          `${a.name.toLowerCase()}|${a.city.toLowerCase()}`
+      )
+    );
+    const orphaned: string[] = [];
+    for (const o of (overrides as {areas: {name: string; cities: string[]}[]})
+      .areas)
+      for (const c of o.cities) {
+        const key = `${o.name.toLowerCase()}|${c.toLowerCase()}`;
+        const aliasOnly =
+          !ownNames.has(key) &&
+          areas.areas.some(
+            (a: {city: string; aliases: string[]}) =>
+              a.city.toLowerCase() === c.toLowerCase() &&
+              a.aliases.some((al) => al.toLowerCase() === o.name.toLowerCase())
+          );
+        if (aliasOnly) orphaned.push(key);
+      }
+    expect(orphaned).toEqual([]);
+  });
+
+  it('the override invariant changed exactly one record, and no more', () => {
+    // Blast-radius pin. The invariant drops GeoNames alternate names across all
+    // 4,281 records; without this test a regeneration could silently restyle
+    // any number of canonical outputs. It is narrowed to names that have no
+    // record of their own in that city, so `Iqbal Town`/`Gulberg` in Lahore —
+    // which do — keep the GeoNames spelling they have always had.
+    const claimedWithoutOwnRecord: string[] = [];
+    const ownNames = new Set(
+      areas.areas.map(
+        (a: {name: string; city: string}) =>
+          `${a.name.toLowerCase()}|${a.city.toLowerCase()}`
+      )
+    );
+    for (const o of (overrides as {areas: {name: string; cities: string[]}[]})
+      .areas)
+      for (const c of o.cities) {
+        const key = `${o.name.toLowerCase()}|${c.toLowerCase()}`;
+        if (!ownNames.has(key)) claimedWithoutOwnRecord.push(key);
+      }
+    // Every override name now has its own record in every city it claims —
+    // which is precisely what the invariant guarantees after the build.
+    expect(claimedWithoutOwnRecord).toEqual([]);
+
+    // And the localities the narrowing protects are untouched.
+    const allama = areas.areas.find(
+      (a: {name: string; city: string}) =>
+        a.name === 'Allama Iqbal Town' && a.city === 'Lahore'
+    );
+    expect(allama?.aliases).toContain('Iqbal Town');
+  });
+
+  it('an override name still resolves in cities the override does not claim', () => {
+    // Guards the scoping above against being widened back to a global drop.
+    const newTown = areas.areas.find(
+      (a: {name: string; city: string}) =>
+        a.name === 'New Town' && a.city === 'Hyderabad'
+    );
+    expect(newTown?.aliases).toContain('Model Town');
   });
 });

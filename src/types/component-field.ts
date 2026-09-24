@@ -1,2 +1,2 @@
 export type ComponentField =
-  'house' | 'street' | 'block' | 'sector' | 'phase' | 'unit';
+  'house' | 'street' | 'block' | 'sector' | 'phase' | 'unit' | 'chak';

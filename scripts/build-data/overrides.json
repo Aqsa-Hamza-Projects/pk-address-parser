@@ -117,6 +117,7 @@
       "name": "Satellite Town",
       "aliases": [],
       "cities": ["Rawalpindi", "Gujranwala", "Bahawalpur", "Sargodha"]
-    }
+    },
+    {"name": "Latifabad", "aliases": [], "cities": ["Hyderabad"]}
   ]
 }
