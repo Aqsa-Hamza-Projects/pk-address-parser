@@ -1,6 +1,6 @@
 {
   "name": "pk-address-parser",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Parse, normalize and standardize messy Pakistani street addresses into structured fields — house, street, block, sector, phase, area, city, province. Zero-dependency TypeScript address parser for Pakistan e-commerce, logistics, delivery, real-estate and CRM.",
   "keywords": [
     "pakistan",

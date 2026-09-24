@@ -11,6 +11,8 @@ grouped into _Added_ / _Changed_ / _Fixed_ / _Removed_.
 
 ## [Unreleased]
 
+## [0.0.4] — 2026-09-24
+
 ### Added
 
 - Automated OIDC npm publishing workflow via GitHub Actions (`.github/workflows/publish.yml`).
