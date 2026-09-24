@@ -11,6 +11,42 @@ grouped into _Added_ / _Changed_ / _Fixed_ / _Removed_.
 
 ## [Unreleased]
 
+## [0.0.7] — 2026-09-24
+
+### Added
+
+- Roman-Urdu house and street labels (`makan`, `ghar`, `bangla`, `bunglow`,
+  `bungalow`, `villa`, `makaan`, `gali`, `galli`, `koocha`, `kucha`, `lane`)
+  and the number words `no`/`nos`/`num`/`nmbr`/`number`, so
+  `makan no 12 gali 5 johar town lahore` now yields `house: '12'`,
+  `street: '5'`. A label is matched only when a number follows it, so the
+  several hundred localities whose names contain one — `Makan Bagh`,
+  `Sund Gali`, `Ghanta Ghar`, `Qasim Lane`, 188 places beginning `Goth …` —
+  are unaffected. A Roman-Urdu label is additionally ignored when a word
+  precedes it, so a locality that _ends_ in a label word survives a trailing
+  number too: `Sund Gali 5` stays `area: 'Sund Gali'`. Pinned by a test that
+  runs the rules over all 4,281 gazetteer names and aliases, bare and with a
+  number appended, and asserts zero matches.
+- Roman-Urdu landmark prepositions: `qareeb`, `kareeb`, `nazdeek`, `k paas`,
+  `k samne`, `k pichay`, `k saath` (and the `ke` spellings), plus `nearby`,
+  `near by`, `next to` and `close to`. All canonicalize to the English term the
+  package already emits, so `qareeb X` and `near X` both give `Near X`.
+
+### Changed
+
+- `nearby <place>` is now recognized as a landmark. It previously returned no
+  landmark, which left the words in `unmatched`.
+
+### Fixed
+
+- A bare `mohalla`, `muhalla`, `mahalla`, `moza`, `mauza`, `village`, `goth` or
+  `basti` no longer lingers in `unmatched` once the gazetteer has already
+  resolved the area: `mohalla islampura sialkot` → `area: 'Islampura'`,
+  `unmatched: []`. Where no area resolved the label is kept, so
+  `goth allah dino, thatta` still gives `area: 'Goth Allah Dino'`.
+- Landmark prepositions are matched longest-first, so `near by masjid` gives
+  `Near masjid` instead of `Near by masjid`.
+
 ## [0.0.6] — 2026-09-24
 
 ### Added

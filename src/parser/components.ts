@@ -4,6 +4,7 @@ import type {
   ComponentResult,
   ComponentRule,
 } from '../interfaces/index.js';
+import {HOUSE_RE, STREET_RE, HOUSE_URDU_RE, STREET_URDU_RE} from './labels.js';
 import {SUBUNIT_LABELS} from './subunit-labels.js';
 
 const ROMAN: Record<string, string> = {
@@ -48,10 +49,14 @@ function floorLabel(raw: string): string {
 // Order matters: labeled sector before block; bare sector after block/unit;
 // house label before bare '#'.
 const RULES: ComponentRule[] = [
-  {
-    field: 'house',
-    re: /\b(?:house|hno|kothi|plot|h)\b\s*(?:\.?\s*no\.?)?\s*[:#.-]?\s*([0-9]+[a-z]?(?:[/-][0-9a-z]+)*)/i,
-  },
+  // English labels first, with their pre-Roman-Urdu behaviour unchanged.
+  {field: 'house', re: HOUSE_RE},
+  // Roman Urdu: a number after the label is NOT sufficient on its own, because
+  // `Sund Gali`, `Ghanta Ghar` and `Qasim Lane` are real localities that end
+  // in a label word — `Sund Gali 5` must stay the area `Sund Gali`, not become
+  // `Sund` + street 5. The rule additionally requires that no word precede the
+  // label. Both halves are pinned in `test/label-corpus.test.ts`.
+  {field: 'house', re: HOUSE_URDU_RE},
   // The bare `#` house rule must not claim `Chak # 66/5-L` — the chak rule
   // runs last (see its comment), so without this guard `#` would take the
   // canal-branch value as a house number before chak ever sees it.
@@ -59,10 +64,8 @@ const RULES: ComponentRule[] = [
     field: 'house',
     re: /(?:^|[(,\s])(?<!chak\s)#\s*([0-9]+[a-z]?(?:[/-][0-9a-z]+)*)/i,
   },
-  {
-    field: 'street',
-    re: /\b(?:street|st)\b\.?\s*(?:no\.?\s*)?[:#.-]?\s*([0-9]+[a-z]?(?:-[0-9a-z]+)?)/i,
-  },
+  {field: 'street', re: STREET_RE},
+  {field: 'street', re: STREET_URDU_RE},
   {
     field: 'sector',
     re: /\bsector\s*[:#.-]?\s*([a-z]{1,2}-?[0-9]{1,2}(?:\/[0-9]{1,2})?)/i,

@@ -2,6 +2,7 @@ import {emptyResult} from '../result.js';
 import {COUNTRY} from '../constants.js';
 import type {ParsedAddress, AssembleInput} from '../interfaces/index.js';
 import type {ComponentField} from '../types/index.js';
+import {stripLocalityLabels} from './labels.js';
 import {SUBUNIT_LABELS, GUARD_ONLY_SUBUNIT_LABELS} from './subunit-labels.js';
 
 function titleCase(s: string): string {
@@ -117,7 +118,14 @@ export function assemble(input: AssembleInput): ParsedAddress {
   r.country = COUNTRY;
   r.phone = input.phone;
 
-  let leftover = input.geo.leftover;
+  // A bare `mohalla`/`goth`/`basti` left over once the gazetteer has already
+  // named the area is noise, not a locality. Stripped here rather than during
+  // normalization because `Mohalla Qasimabad` is itself a real area — the
+  // label may only be discarded after the gazetteer has had its look.
+  let leftover = stripLocalityLabels(
+    input.geo.leftover,
+    input.geo.area !== null
+  );
   let areaFromFallback = false;
   if (
     input.geo.area == null &&

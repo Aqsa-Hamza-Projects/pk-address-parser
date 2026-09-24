@@ -320,6 +320,47 @@ are unchanged.
 (`Flat`, `Shop`, `Unit`, a floor) does, because a sub-unit says nothing about
 whether the _place_ was identified.
 
+## Roman-Urdu input
+
+Roman Urdu is how most Pakistani phone users type an informal address — WhatsApp
+orders, Daraz and Foodpanda address fields — so the parser accepts the common
+labels alongside the English ones.
+
+| Field       | Labels                                                                                                                                         |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `house`     | `house`, `h`, `hno`, `kothi`, `plot`, `makan`, `ghar`, `bangla`, `bunglow`, `bungalow`, `villa`                                                |
+| `street`    | `street`, `st`, `gali`, `galli`, `koocha`, `kucha`, `lane`                                                                                     |
+| number word | `no`, `nos`, `num`, `nmbr`, `number`, `#`                                                                                                      |
+| `landmark`  | `qareeb`, `kareeb`, `nazdeek`, `k paas`, `k samne`, `k pichay`, `k saath` (and the `ke` spellings), `nearby`, `near by`, `next to`, `close to` |
+
+```js
+parseAddress({address: 'makan no 12 gali 5 johar town lahore'});
+// → { house: '12', street: '5', area: 'Johar Town', city: 'Lahore', … }
+
+normalizeAddress({address: 'makan no 12 gali 5 johar town lahore'});
+// → 'House 12, Street 5, Johar Town, Lahore, Punjab, Pakistan'
+```
+
+Landmark prepositions are canonicalized to the English term the package already
+emits, so `qareeb`, `k paas` and `nearby` all produce `Near …`.
+
+**A label is only read as a label when a number follows it.** Several hundred
+real localities are _named_ after these words — `Makan Bagh`, `Sund Gali`,
+`Ghanta Ghar`, `Qasim Lane`, `Sufan Ka Bangla` and 188 places beginning
+`Goth …` — so `Sund Gali, Muzaffarabad` still resolves as an `area`, while
+`gali 5` is a `street`.
+
+For the same reason a bare `mohalla`, `muhalla`, `mahalla`, `moza`, `mauza`,
+`village`, `goth` or `basti` is dropped from `unmatched` **only once the
+gazetteer has already named the area**:
+
+```js
+parseAddress({address: 'mohalla islampura sialkot'}).unmatched; // → []
+parseAddress({address: 'goth allah dino, thatta'}).area; // → 'Goth Allah Dino'
+```
+
+Where the gazetteer found nothing, the label is kept — it is part of the name.
+
 ## Data & coverage
 
 The bundled gazetteer is generated from [GeoNames](https://www.geonames.org/)
@@ -360,6 +401,17 @@ network.
 - **One `area` slot, one `unit` slot and one `chak` slot.** Extra locality,
   unit or chak descriptors (a second `"2nd Floor"` after a `"Flat 3"`, a second
   `Chak`) go to `unmatched`.
+- **A bare locality label is only dropped from a clean remainder.** `mohalla`,
+  `goth`, `basti` and friends are removed from `unmatched` only when the
+  gazetteer resolved the area _and_ nothing else is left over, so
+  `mohalla islampura sialkot` gives `unmatched: []` but
+  `mohalla islampura near masjid sialkot` still keeps `mohalla`. The label has
+  no position information by then, so dropping it while other tokens remain
+  could discard a word belonging to a different phrase.
+- **A Roman-Urdu label is ignored when a word precedes it**, so a locality
+  named after one survives a trailing number: `Sund Gali 5` stays
+  `area: 'Sund Gali'` with `5` in `unmatched`, rather than becoming `Sund` plus
+  street `5`. The cost is that `johar town gali 5` does not parse the street.
 - **A bare multi-city society name** (`"DHA"`, `"Cantt"`) with no city token
   will not resolve a `city` or `province` — it would otherwise have to guess one
   arbitrarily. Pass `defaultCity` or include the city in the input.
