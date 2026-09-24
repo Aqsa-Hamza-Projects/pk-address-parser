@@ -7,6 +7,12 @@ export interface ParsedAddress {
   sector: string | null;
   phase: string | null;
   unit: string | null;
+  /**
+   * Punjab canal-colony chak number, e.g. `'123/GB'`, `'45/JB'`, `'7/1-L'`.
+   * In rural Punjab this IS the locality, so `area` is normally null when it
+   * is set.
+   */
+  chak: string | null;
   landmark: string | null;
   area: string | null;
   city: string | null;

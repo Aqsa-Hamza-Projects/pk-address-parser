@@ -52,7 +52,13 @@ const RULES: ComponentRule[] = [
     field: 'house',
     re: /\b(?:house|hno|kothi|plot|h)\b\s*(?:\.?\s*no\.?)?\s*[:#.-]?\s*([0-9]+[a-z]?(?:[/-][0-9a-z]+)*)/i,
   },
-  {field: 'house', re: /(?:^|[(,\s])#\s*([0-9]+[a-z]?(?:[/-][0-9a-z]+)*)/i},
+  // The bare `#` house rule must not claim `Chak # 66/5-L` — the chak rule
+  // runs last (see its comment), so without this guard `#` would take the
+  // canal-branch value as a house number before chak ever sees it.
+  {
+    field: 'house',
+    re: /(?:^|[(,\s])(?<!chak\s)#\s*([0-9]+[a-z]?(?:[/-][0-9a-z]+)*)/i,
+  },
   {
     field: 'street',
     re: /\b(?:street|st)\b\.?\s*(?:no\.?\s*)?[:#.-]?\s*([0-9]+[a-z]?(?:-[0-9a-z]+)?)/i,
@@ -92,7 +98,41 @@ const RULES: ComponentRule[] = [
     re: /(?:^|[,\s])([a-z]-[0-9]{1,2}(?:\/[0-9]{1,2})?)(?=$|[,\s])/i,
     transform: (s) => s.toUpperCase(),
   },
+  // Punjab canal-colony chak number: `Chak No. 123/GB`, `Chak 45/JB`,
+  // `Chak 7/1-L`. Two guards, each needed, each proven load-bearing against
+  // all 4,281 gazetteer names (see test/rules-vs-gazetteer.test.ts):
+  //   * lookbehind — `chak` must start its comma segment, so the real names
+  //     `Dera Gardawar Chak 108/P` and `Basti Blochan Chak 55p.` are not eaten;
+  //   * the bare-number alternative refuses a number followed by another word,
+  //     space- OR hyphen-separated, so the real names `Chak 46 NB` / `Chak 42
+  //     NB` — and the equally ordinary spelling `Chak 46-NB` — keep resolving
+  //     as areas. The branch-code alternatives are therefore split: after `/`
+  //     anything word-ish may follow (`123/GB`), but after `-` a digit must
+  //     (`7/1-L`, `7-1-L`), because every real hyphen form is digit-led while
+  //     every colliding gazetteer name is letter-led.
+  //
+  // Runs LAST on purpose. Rural addresses are frequently written without
+  // commas (`House 12 Chak 45/JB Faisalabad`), where a preceding house/plot
+  // token would defeat the segment-start guard. By this point the earlier
+  // rules have blanked their own spans to whitespace, so that prefix no longer
+  // blocks the match — while a genuine locality prefix (`Dera Gardawar`) is
+  // still there and still blocks it. No earlier rule can consume the
+  // slash-bearing value: none of their labels match `chak`.
+  {
+    field: 'chak',
+    re: /(?<=(?:^|,)\s*)chak\s*(?:no\.?|#)?\s*(\d{1,4}\/[0-9A-Za-z][0-9A-Za-z-]*|\d{1,4}-\d[0-9A-Za-z-]*|\d{1,4}(?![\s-]*[0-9A-Za-z]))/i,
+    transform: (s) => s.toUpperCase(),
+  },
 ];
+
+/**
+ * The shipped rule for a field, for tests that must sweep it over the
+ * gazetteer corpus. Exported so those tests validate the *shipped* regex
+ * rather than a copy that can silently drift out of date.
+ */
+export function getRules(field: ComponentField): ComponentRule[] {
+  return RULES.filter((r) => r.field === field);
+}
 
 export function extractComponents(text: string): ComponentResult {
   const matches: ComponentMatch[] = [];

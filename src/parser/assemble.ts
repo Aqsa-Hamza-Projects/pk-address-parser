@@ -26,6 +26,11 @@ const SUBUNIT = new RegExp(
   'i'
 );
 
+// A leftover that is a numbered chak — `Chak 6`, `Chak 12345/GB`, and with the
+// filler word an `and`-joined second chak leaves behind. Requires a digit, so
+// real spelled-out names (`Chak Seven Jhang Branch`) are untouched.
+const CHAK_LEFTOVER = /^(?:and\s+)?chak\b[\s.:#-]*(?:no\.?)?[\s.:#-]*\d/i;
+
 /**
  * Is a leftover run plausibly a locality name?
  *
@@ -47,6 +52,13 @@ function looksLikeArea(tokens: string[]): boolean {
   if (/\d{6,}/.test(joined.replace(/[\s.()-]/g, ''))) return false;
   if (FLOOR.test(joined)) return false;
   if (SUBUNIT.test(joined)) return false;
+  // A numbered chak is a locality the `chak` rule owns, not a name to invent.
+  // Only one chak is captured per address, so a second one (`Chak 5, Chak 6`)
+  // or one the rule declined (`Chak 12345/GB`, over the 4-digit cap) reaches
+  // here — and must go to `unmatched` rather than become a fabricated `area`.
+  // Spelled-out chaks (`Chak Seven Jhang Branch`) are real gazetteer names and
+  // are deliberately still allowed through.
+  if (CHAK_LEFTOVER.test(joined)) return false;
   return true;
 }
 
@@ -58,6 +70,26 @@ function setComponent(
   result[field] = value;
 }
 
+/**
+ * Credit for the single best locality signal in the result.
+ *
+ * At most one locality signal scores. A gazetteer-resolved `area` and a `chak`
+ * are both locality evidence worth the same; a guessed (non-gazetteer) area is
+ * not evidence at all and costs a penalty so `confidence` still flags the
+ * address for review.
+ *
+ * Ordered, not additive: a chak outranks a *guessed* area, because a fabricated
+ * locality must never suppress the credit for a self-validating one. Before
+ * this was ordered, `Chak 5, Chak 6, Faisalabad` scored 0.55 — lower than the
+ * bare `Chak 5, Faisalabad` at 0.80 — despite carrying strictly more evidence.
+ */
+function localityScore(r: ParsedAddress, areaFromFallback: boolean): number {
+  if (r.area && !areaFromFallback) return 0.15; // gazetteer area
+  if (r.chak) return 0.15; // self-validating rural locality
+  if (r.area && areaFromFallback) return -0.1; // guessed, not evidence
+  return 0;
+}
+
 export function computeConfidence(
   r: ParsedAddress,
   areaFromFallback = false
@@ -65,10 +97,7 @@ export function computeConfidence(
   let score = 0;
   if (r.province) score += 0.35;
   if (r.city) score += 0.3;
-  if (r.area && !areaFromFallback) score += 0.15;
-  // A guessed (non-gazetteer) area is not evidence — no credit, plus a penalty
-  // so `confidence` still flags the address for review.
-  if (r.area && areaFromFallback) score -= 0.1;
+  score += localityScore(r, areaFromFallback);
   let comp = 0;
   for (const f of ['house', 'street', 'block', 'sector', 'phase'] as const) {
     if (r[f]) comp += 0.05;

@@ -11,6 +11,34 @@ grouped into _Added_ / _Changed_ / _Fixed_ / _Removed_.
 
 ## [Unreleased]
 
+## [0.0.6] — 2026-09-24
+
+### Added
+
+- `chak` on `ParsedAddress`: Punjab canal-colony numbering (`'123/GB'`,
+  `'45/JB'`, `'7/1-L'`). `normalizeAddress` emits `Chak <n>`, and a resolved
+  chak counts as locality evidence for `confidence`. The rule is guarded so
+  real gazetteer localities such as `Chak 46 NB` and `Dera Gardawar Chak 108/P`
+  still resolve as areas.
+- Hyderabad's `Unit N` sub-division is captured into `unit` with its label
+  preserved (`'Unit 7'`) instead of falling into `unmatched`.
+
+### Fixed
+
+- Plain `Latifabad, Hyderabad` resolved to `Latifabad Number Ten`, because
+  GeoNames listed `Latifabad` only as an alternate name of that record. It is
+  now its own gazetteer entry, and the data generator drops an alternate name
+  that collides with a curated override area name — but only in a city that
+  override claims, and only where the curated name has no record of its own
+  there. Exactly one alias is affected; the numbered Latifabad variants, and
+  every other locality, are unchanged.
+- A leftover that is a numbered chak (`Chak 5, Chak 6, …`, or a chak the rule
+  declined) is no longer promoted to a fabricated `area`; it goes to
+  `unmatched` like other unclassifiable tokens.
+- A long run of vertical-tab or form-feed characters in the input is now
+  collapsed with other whitespace, so a hostile paste can no longer make
+  parsing quadratic.
+
 ## [0.0.4] — 2026-09-24
 
 ### Added

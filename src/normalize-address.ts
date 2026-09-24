@@ -11,6 +11,7 @@ export function normalizeAddress(params: ParseAddressParams): string {
   if (parsed.sector) parts.push(`Sector ${parsed.sector}`);
   if (parsed.phase) parts.push(`Phase ${parsed.phase}`);
   if (parsed.unit) parts.push(parsed.unit);
+  if (parsed.chak) parts.push(`Chak ${parsed.chak}`);
   if (parsed.landmark) parts.push(parsed.landmark);
   if (parsed.area) parts.push(parsed.area);
 

@@ -32,6 +32,31 @@ describe('named-parameters contract', () => {
     expect(api.listProvinces()).toHaveLength(7);
   });
 
+  // Order is asserted deliberately, not incidentally: `ParsedAddress` is the
+  // documented result shape and the README table lists these fields in this
+  // order, so inserting or moving one should be a visible, intentional diff
+  // rather than something that slips in with a feature.
+  it('ParsedAddress has exactly the documented fields, in declared order', () => {
+    expect(Object.keys(api.parseAddress({address: 'Lahore'}))).toEqual([
+      'house',
+      'street',
+      'block',
+      'sector',
+      'phase',
+      'unit',
+      'chak',
+      'landmark',
+      'area',
+      'city',
+      'province',
+      'country',
+      'phone',
+      'raw',
+      'unmatched',
+      'confidence',
+    ]);
+  });
+
   it('exports exactly the documented surface', () => {
     expect(Object.keys(api).sort()).toEqual(
       [
