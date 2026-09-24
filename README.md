@@ -344,6 +344,19 @@ normalizeAddress({address: 'makan no 12 gali 5 johar town lahore'});
 Landmark prepositions are canonicalized to the English term the package already
 emits, so `qareeb`, `k paas` and `nearby` all produce `Near …`.
 
+The Urdu forms are also read in natural word order, after the place, when they
+end a comma-separated segment (`k`/`ke` + `paas`, `pass`, `qareeb`, `kareeb`,
+`nazdeek`, `samne`, `saamne`, `pichay`, `peechay`, `saath`):
+
+```js
+parseAddress({address: 'House 5, Jamia Masjid ke paas, Johar Town, Lahore'})
+  .landmark; // → 'Near Jamia Masjid'
+```
+
+A segment whose text before the postposition holds a house, street or other
+component is left alone, so `house 5 gali 3 johar town lahore masjid ke paas`
+keeps its house and street; the trailing words go to `unmatched`.
+
 **A label is only read as a label when a number follows it.** Several hundred
 real localities are _named_ after these words — `Makan Bagh`, `Sund Gali`,
 `Ghanta Ghar`, `Qasim Lane`, `Sufan Ka Bangla` and 188 places beginning

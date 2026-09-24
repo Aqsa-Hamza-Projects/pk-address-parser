@@ -1,4 +1,5 @@
 import type {LandmarkResult} from '../interfaces/index.js';
+import {extractComponents} from './components.js';
 
 // English plus the Roman-Urdu forms people actually type on PK phones.
 // Sorted longest-first, so a shorter preposition can never shadow a longer one
@@ -70,6 +71,26 @@ const CANON: Record<string, string> = {
   'ke saath': 'adjacent to',
 };
 
+// Urdu puts these AFTER the place — "Masjid ke paas" — so they are matched at
+// the end of a segment too, not only as the prefix forms above.
+const POSTPOSITION_CANON: Record<string, string> = {
+  paas: 'near',
+  pass: 'near',
+  qareeb: 'near',
+  kareeb: 'near',
+  nazdeek: 'near',
+  samne: 'opposite',
+  saamne: 'opposite',
+  pichay: 'behind',
+  peechay: 'behind',
+  saath: 'adjacent to',
+};
+
+const POSTPOSITION = new RegExp(
+  `^(.+?)\\s+(?:k|ke)\\s+(${Object.keys(POSTPOSITION_CANON).join('|')})\\.?$`,
+  'i'
+);
+
 function titleCase(phrase: string): string {
   return phrase.replace(/\b\w/g, (c) => c.toUpperCase());
 }
@@ -90,6 +111,16 @@ export function extractLandmark(segment: string): LandmarkResult {
         rest,
       };
     }
+  }
+  const [, place = '', word = ''] = POSTPOSITION.exec(trimmed) ?? [];
+  const canon = POSTPOSITION_CANON[word.toLowerCase()];
+  // In a comma-less address ending "… house 5 gali 3 lahore masjid ke paas"
+  // the whole segment precedes the postposition; taking it as the landmark
+  // would swallow house and street, so leave such a segment to the rules.
+  if (canon && extractComponents(place).matches.length === 0) {
+    const rest = place.trim();
+    const canonPrep = titleCase(canon);
+    return {landmark: `${canonPrep} ${rest}`, preposition: canonPrep, rest};
   }
   return {landmark: null, preposition: null, rest: null};
 }
