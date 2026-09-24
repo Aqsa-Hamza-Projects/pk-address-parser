@@ -11,6 +11,20 @@ grouped into _Added_ / _Changed_ / _Fixed_ / _Removed_.
 
 ## [Unreleased]
 
+## [0.0.8] — 2026-09-24
+
+### Fixed
+
+- Roman-Urdu landmark postpositions are now recognized in natural word order:
+  `Jamia Masjid ke paas` → `Near Jamia Masjid`, `Emporium Mall k samne` →
+  `Opposite Emporium Mall`, `school ke peechay` → `Behind school`,
+  `Shell Pump ke saath` → `Adjacent To Shell Pump`, and `ke qareeb` /
+  `ke nazdeek` → `Near`. Previously only the prefix order (`ke paas Masjid`)
+  matched, so the way people actually write it went to `unmatched`. A segment
+  whose leading text contains a house, street or other component is not taken
+  as a landmark, so a comma-less address ending in a postposition keeps its
+  house and street.
+
 ## [0.0.7] — 2026-09-24
 
 ### Added

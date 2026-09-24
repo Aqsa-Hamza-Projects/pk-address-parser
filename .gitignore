@@ -7,3 +7,4 @@ scripts/build-data/.cache/
 CLAUDE.md
 AGENTS.md
 .DS_Store
+config.bat
