@@ -3,6 +3,14 @@ import type {NormalizedInput} from '../interfaces/index.js';
 import {normalizePunctuation} from './punctuation.js';
 import {expandAbbreviations} from './abbreviations.js';
 
+/** Split normalized text into comma-delimited segments, dropping empties. */
+export function segment(text: string): string[] {
+  return text
+    .split(',')
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+}
+
 export function normalizeInput(raw: string): NormalizedInput {
   if (typeof raw !== 'string' || raw.trim() === '') {
     return {text: '', segments: []};
@@ -12,9 +20,5 @@ export function normalizeInput(raw: string): NormalizedInput {
     cleaned,
     abbreviations as Record<string, string>
   );
-  const segments = text
-    .split(',')
-    .map((s) => s.trim())
-    .filter((s) => s.length > 0);
-  return {text, segments};
+  return {text, segments: segment(text)};
 }

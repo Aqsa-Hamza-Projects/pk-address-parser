@@ -5,6 +5,7 @@ export interface AssembleInput {
   raw: string;
   components: ComponentMatch[];
   landmark: string | null;
+  phone: string | null;
   geo: GeoResolution;
   strict: boolean;
 }
